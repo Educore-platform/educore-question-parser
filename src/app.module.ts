@@ -52,7 +52,7 @@ import { InvalidExamQuestion } from './model/entities/invalid-exam-question.enti
           Subject,
           InvalidExamQuestion,
         ],
-        synchronize: config.get<string>('nodeEnv') !== 'production',
+        // synchronize: config.get<string>('nodeEnv') !== 'production',
         // logging: config.get<string>('nodeEnv') === 'development',
         migrations: ['dist/database/migrations/*.js'],
         migrationsRun:

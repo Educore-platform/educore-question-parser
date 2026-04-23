@@ -22,9 +22,13 @@ export class Init1776901890057 implements MigrationInterface {
     await queryRunner.query(
       `CREATE INDEX "IDX_8ac285859229663f5f6b312c8c" ON "exam_papers" ("exam_type_id", "subject_id") `,
     );
-    await queryRunner.query(
-      `CREATE TYPE "public"."cloudinary_status_enum" AS ENUM('pending', 'uploaded', 'failed')`,
-    );
+    await queryRunner.query(`
+      DO $$ BEGIN
+        CREATE TYPE "public"."cloudinary_status_enum" AS ENUM('pending', 'uploaded', 'failed');
+      EXCEPTION
+        WHEN duplicate_object THEN NULL;
+      END $$;
+    `);
     await queryRunner.query(
       `CREATE TABLE "documents" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now(), "deleted_at" TIMESTAMP, "exam_paper_id" uuid, "question_id" uuid, "type" character varying NOT NULL, "source" character varying NOT NULL, "cloudinary_status" "public"."cloudinary_status_enum", "cloudinary_url" character varying, "cloudinary_public_id" character varying, "storage_path" character varying, "content_sha256" character varying(64), "meta" jsonb NOT NULL DEFAULT '{}', CONSTRAINT "UQ_115e8a5f923e05b86137d32d1fb" UNIQUE ("content_sha256"), CONSTRAINT "PK_ac51aa5181ee2036f5ca482857c" PRIMARY KEY ("id"))`,
     );
@@ -46,9 +50,13 @@ export class Init1776901890057 implements MigrationInterface {
     await queryRunner.query(
       `CREATE INDEX "IDX_exam_questions_paper_year" ON "exam_questions" ("exam_paper_id", "year") `,
     );
-    await queryRunner.query(
-      `CREATE TYPE "public"."ai_processed_exam_questions_status_enum" AS ENUM('pending', 'completed', 'failed')`,
-    );
+    await queryRunner.query(`
+      DO $$ BEGIN
+        CREATE TYPE "public"."ai_processed_exam_questions_status_enum" AS ENUM('pending', 'completed', 'failed');
+      EXCEPTION
+        WHEN duplicate_object THEN NULL;
+      END $$;
+    `);
     await queryRunner.query(
       `CREATE TABLE "ai_processed_exam_questions" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now(), "deleted_at" TIMESTAMP, "exam_question_id" uuid NOT NULL, "question_text" text, "question_latex" text, "options" jsonb, "answer" character varying, "explanation" text, "topic" character varying, "related_topic" character varying, "status" "public"."ai_processed_exam_questions_status_enum" NOT NULL DEFAULT 'pending', CONSTRAINT "REL_15acf7368f8d2cdf4fa896c3cf" UNIQUE ("exam_question_id"), CONSTRAINT "PK_6d1f12dd47560800c06f569fd2d" PRIMARY KEY ("id"))`,
     );
@@ -115,7 +123,7 @@ export class Init1776901890057 implements MigrationInterface {
     );
     await queryRunner.query(`DROP TABLE "ai_processed_exam_questions"`);
     await queryRunner.query(
-      `DROP TYPE "public"."ai_processed_exam_questions_status_enum"`,
+      `DROP TYPE IF EXISTS "public"."ai_processed_exam_questions_status_enum"`,
     );
     await queryRunner.query(
       `DROP INDEX "public"."IDX_exam_questions_paper_year"`,
@@ -134,7 +142,9 @@ export class Init1776901890057 implements MigrationInterface {
       `DROP INDEX "public"."IDX_deb6419eca6011ec947aa3bfff"`,
     );
     await queryRunner.query(`DROP TABLE "documents"`);
-    await queryRunner.query(`DROP TYPE "public"."cloudinary_status_enum"`);
+    await queryRunner.query(
+      `DROP TYPE IF EXISTS "public"."cloudinary_status_enum"`,
+    );
     await queryRunner.query(
       `DROP INDEX "public"."IDX_8ac285859229663f5f6b312c8c"`,
     );

@@ -1,0 +1,14 @@
+node_modules
+dist
+.git
+.gitignore
+.env
+.env.*
+test
+**/*.spec.ts
+**/*.test.ts
+coverage
+.eslintrc*
+.prettierrc*
+README.md
+*.log

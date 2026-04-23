@@ -6,6 +6,11 @@ import { ResponseInterceptor } from './shared/interceptors/response.interceptor'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const port = Number(process.env.PORT ?? 3000);
+  const railwayDomain = process.env.RAILWAY_PUBLIC_DOMAIN?.trim();
+  const swaggerServerUrl = railwayDomain
+    ? `https://${railwayDomain.replace(/\/+$/, '')}`
+    : `http://localhost:${port}`;
 
   // ── Global prefix & versioning ───────────────────────────────────────────
   app.setGlobalPrefix('api');
@@ -26,14 +31,14 @@ async function bootstrap() {
   // ── CORS ─────────────────────────────────────────────────────────────────
   app.enableCors();
 
-  // ── Swagger (non-production only) ────────────────────────────────────────
+  // ── Swagger ──────────────────────────────────────────────────────────────
   const swaggerConfig = new DocumentBuilder()
     .setTitle('EduCore Question Parser API')
     .setDescription(
       'REST API for parsing, extracting, and enriching exam questions from PDF documents.',
     )
     .setVersion('1.0')
-    .addServer(`http://localhost:${process.env.PORT ?? 3000}`, 'Local')
+    .addServer(swaggerServerUrl, railwayDomain ? 'Production' : 'Local')
     .addBearerAuth(
       { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
       'access-token',
@@ -59,13 +64,10 @@ async function bootstrap() {
     },
   });
 
-  const port = process.env.PORT ?? 3000;
   await app.listen(port);
 
   console.log(`\n🚀  Application running on: http://localhost:${port}/api`);
-  if (process.env.NODE_ENV !== 'production') {
-    console.log(`📖  Swagger docs:          http://localhost:${port}/api/docs`);
-  }
+  console.log(`📖  Swagger docs:          ${swaggerServerUrl}/api/docs`);
 }
 
 void bootstrap();

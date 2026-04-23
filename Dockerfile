@@ -41,8 +41,10 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package*.json ./
 
-# Non-root user
-RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+# Non-root user — writable dirs for multer + extraction media (defaults: ./uploads, ./media)
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser \
+  && mkdir -p /app/uploads /app/media \
+  && chown -R appuser:appgroup /app/uploads /app/media
 USER appuser
 
 EXPOSE 3000

@@ -2,7 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ExamQuestion } from '../model/entities/exam-question.entity';
-import { QuestionBulkAction, QuestionIngestionSource, QuestionStatus } from '../model/entities/enums';
+import {
+  QuestionBulkAction,
+  QuestionIngestionSource,
+  QuestionStatus,
+} from '../model/entities/enums';
 import { PaginatedResponseDto } from '../shared/dto/pagination.dto';
 import { paginationOptions } from '../shared/utils/paginate.util';
 import { QuestionFilterDto } from './dto/question-filter.dto';
@@ -18,7 +22,9 @@ export class QuestionsService {
     private readonly questionRepo: Repository<ExamQuestion>,
   ) {}
 
-  async findAll(filter: QuestionFilterDto): Promise<PaginatedResponseDto<QuestionListItemDto>> {
+  async findAll(
+    filter: QuestionFilterDto,
+  ): Promise<PaginatedResponseDto<QuestionListItemDto>> {
     const qb = this.questionRepo
       .createQueryBuilder('q')
       .select([
@@ -31,7 +37,9 @@ export class QuestionsService {
       ]);
 
     if (filter.examPaperId) {
-      qb.andWhere('q.examPaperId = :examPaperId', { examPaperId: filter.examPaperId });
+      qb.andWhere('q.examPaperId = :examPaperId', {
+        examPaperId: filter.examPaperId,
+      });
     }
     if (filter.subjectId) {
       qb.andWhere('q.subjectId = :subjectId', { subjectId: filter.subjectId });
@@ -47,7 +55,11 @@ export class QuestionsService {
     qb.skip(skip).take(take).orderBy('q.createdAt', 'DESC');
 
     const [items, total] = await qb.getManyAndCount();
-    return PaginatedResponseDto.of(items as QuestionListItemDto[], total, filter);
+    return PaginatedResponseDto.of(
+      items as QuestionListItemDto[],
+      total,
+      filter,
+    );
   }
 
   async findOne(id: string): Promise<ExamQuestion> {

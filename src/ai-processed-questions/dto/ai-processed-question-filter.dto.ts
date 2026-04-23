@@ -9,7 +9,10 @@ export class AiProcessedQuestionFilterDto extends PaginationQueryDto {
   @IsUUID()
   examQuestionId?: string;
 
-  @ApiPropertyOptional({ enum: AiProcessedStatus, description: 'Filter by AI processing status' })
+  @ApiPropertyOptional({
+    enum: AiProcessedStatus,
+    description: 'Filter by AI processing status',
+  })
   @IsOptional()
   @IsEnum(AiProcessedStatus)
   status?: AiProcessedStatus;

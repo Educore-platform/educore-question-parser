@@ -9,7 +9,10 @@ import { QuestionOption } from '../../model/entities/interfaces';
 export class UpdateAiProcessedQuestionDto {
   @ApiPropertyOptional() @IsOptional() @IsString() questionText?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() questionLatex?: string;
-  @ApiPropertyOptional({ type: 'array' }) @IsOptional() @IsArray() options?: QuestionOption[];
+  @ApiPropertyOptional({ type: 'array' })
+  @IsOptional()
+  @IsArray()
+  options?: QuestionOption[];
   @ApiPropertyOptional() @IsOptional() @IsString() answer?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() explanation?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() topic?: string;

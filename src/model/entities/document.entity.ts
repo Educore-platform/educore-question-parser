@@ -1,16 +1,9 @@
-import {
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  ManyToOne,
-} from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { ExamPaper } from './exam-paper.entity';
 import { ExamQuestion } from './exam-question.entity';
 import { DocumentType, DocumentSource, CloudinaryStatus } from './enums';
 import type { DocumentMeta } from './interfaces';
-
 
 @Entity('documents')
 @Index(['examPaperId'])
@@ -24,7 +17,12 @@ export class Document extends BaseEntity {
   @JoinColumn({ name: 'exam_paper_id' })
   examPaper: ExamPaper | null;
 
-  @Column({ name: 'exam_paper_id', type: 'uuid', nullable: true, default: null })
+  @Column({
+    name: 'exam_paper_id',
+    type: 'uuid',
+    nullable: true,
+    default: null,
+  })
   examPaperId: string | null;
 
   // Null for the source PDF document itself
@@ -54,13 +52,28 @@ export class Document extends BaseEntity {
   })
   cloudinaryStatus: CloudinaryStatus | null;
 
-  @Column({ name: 'cloudinary_url', type: 'varchar', nullable: true, default: null })
+  @Column({
+    name: 'cloudinary_url',
+    type: 'varchar',
+    nullable: true,
+    default: null,
+  })
   cloudinaryUrl: string | null;
 
-  @Column({ name: 'cloudinary_public_id', type: 'varchar', nullable: true, default: null })
+  @Column({
+    name: 'cloudinary_public_id',
+    type: 'varchar',
+    nullable: true,
+    default: null,
+  })
   cloudinaryPublicId: string | null;
 
-  @Column({ name: 'storage_path', type: 'varchar', nullable: true, default: null })
+  @Column({
+    name: 'storage_path',
+    type: 'varchar',
+    nullable: true,
+    default: null,
+  })
   storagePath: string | null;
 
   @Column({

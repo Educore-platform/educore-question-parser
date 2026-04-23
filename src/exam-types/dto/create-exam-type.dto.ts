@@ -2,7 +2,10 @@ import { IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateExamTypeDto {
-  @ApiProperty({ description: 'Exam type name', example: 'JOINT MATRICULATION EXAMINATION' })
+  @ApiProperty({
+    description: 'Exam type name',
+    example: 'JOINT MATRICULATION EXAMINATION',
+  })
   @IsString()
   @IsNotEmpty()
   name: string;

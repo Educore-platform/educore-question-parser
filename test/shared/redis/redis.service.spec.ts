@@ -80,12 +80,14 @@ describe('RedisService', () => {
     });
 
     it('passes password when redis.password is set', async () => {
-      configService.get.mockImplementation((key: string, defaultValue?: unknown) => {
-        if (key === 'redis.host') return 'redis.example';
-        if (key === 'redis.port') return 6380;
-        if (key === 'redis.password') return 'secret';
-        return defaultValue;
-      });
+      configService.get.mockImplementation(
+        (key: string, defaultValue?: unknown) => {
+          if (key === 'redis.host') return 'redis.example';
+          if (key === 'redis.port') return 6380;
+          if (key === 'redis.password') return 'secret';
+          return defaultValue;
+        },
+      );
 
       await service.onModuleInit();
 

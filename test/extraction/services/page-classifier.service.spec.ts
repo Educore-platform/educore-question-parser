@@ -57,7 +57,10 @@ describe('PageClassifierService', () => {
         itemAtX(mid + 50 + i),
       );
 
-      const layout = service.classify([...fewLeft, ...manyRight], viewportWidth);
+      const layout = service.classify(
+        [...fewLeft, ...manyRight],
+        viewportWidth,
+      );
 
       expect(layout.type).toBe('SINGLE');
       expect(layout.segments).toEqual([

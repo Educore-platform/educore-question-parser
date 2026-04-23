@@ -14,7 +14,10 @@ export class DocumentFilterDto extends PaginationQueryDto {
   @IsUUID()
   questionId?: string;
 
-  @ApiPropertyOptional({ enum: DocumentType, description: 'Filter by document type' })
+  @ApiPropertyOptional({
+    enum: DocumentType,
+    description: 'Filter by document type',
+  })
   @IsOptional()
   @IsEnum(DocumentType)
   type?: DocumentType;

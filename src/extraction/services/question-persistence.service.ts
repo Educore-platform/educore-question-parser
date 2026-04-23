@@ -11,8 +11,14 @@ import {
   QuestionStatus,
   QuestionIngestionSource,
 } from '../../model/entities/enums';
-import { SaveQuestionPayload, ExtractionResult } from '../interfaces/extraction.interfaces';
-import { DocumentMetaImage, DocumentMetaTable } from '../../model/entities/interfaces';
+import {
+  SaveQuestionPayload,
+  ExtractionResult,
+} from '../interfaces/extraction.interfaces';
+import {
+  DocumentMetaImage,
+  DocumentMetaTable,
+} from '../../model/entities/interfaces';
 import { MediaHandlerService } from './media-handler.service';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -32,7 +38,9 @@ export class QuestionPersistenceService {
     private readonly examQuestionRepo: Repository<ExamQuestion>,
   ) {}
 
-  async savePaperResult(result: ExtractionResult): Promise<{ questions: ExamQuestion[]; documents: Document[] }> {
+  async savePaperResult(
+    result: ExtractionResult,
+  ): Promise<{ questions: ExamQuestion[]; documents: Document[] }> {
     return this.dataSource.transaction(async (manager) => {
       const savedQuestions: ExamQuestion[] = await manager.save(
         ExamQuestion,
@@ -57,11 +65,18 @@ export class QuestionPersistenceService {
       const mediaQuestionIds = new Set<string>();
 
       for (const pageMedia of result.media) {
-        const sortedQuestions = positionedByPage.get(pageMedia.pageNumber) ?? [];
+        const sortedQuestions =
+          positionedByPage.get(pageMedia.pageNumber) ?? [];
 
         for (const img of pageMedia.images) {
-          const isScanned = this.mediaHandler.isScannedImage(img, pageMedia.pageItems);
-          const { question, position } = this.findRelativeQuestion(img.yPosition, sortedQuestions);
+          const isScanned = this.mediaHandler.isScannedImage(
+            img,
+            pageMedia.pageItems,
+          );
+          const { question, position } = this.findRelativeQuestion(
+            img.yPosition,
+            sortedQuestions,
+          );
           if (question) mediaQuestionIds.add(question.entity.id);
 
           docsToSave.push({
@@ -88,7 +103,10 @@ export class QuestionPersistenceService {
         }
 
         for (const table of pageMedia.tables) {
-          const { question, position } = this.findRelativeQuestion(table.yStart, sortedQuestions);
+          const { question, position } = this.findRelativeQuestion(
+            table.yStart,
+            sortedQuestions,
+          );
           if (question) mediaQuestionIds.add(question.entity.id);
 
           docsToSave.push({
@@ -151,7 +169,8 @@ export class QuestionPersistenceService {
       const next = sortedQuestions[i + 1];
 
       if (mediaY < q.y) return { question: q, position: 'above' };
-      if (next && mediaY > q.y && mediaY < next.y) return { question: q, position: 'below' };
+      if (next && mediaY > q.y && mediaY < next.y)
+        return { question: q, position: 'below' };
     }
 
     return { question: sortedQuestions.at(-1) ?? null, position: 'below' };
@@ -166,7 +185,9 @@ export class QuestionPersistenceService {
       questionText: payload.questionText,
       questionLatex: payload.questionLatex,
       options: payload.options,
-      status: payload.needsLatex ? QuestionStatus.LATEX_QUEUED : QuestionStatus.RAW,
+      status: payload.needsLatex
+        ? QuestionStatus.LATEX_QUEUED
+        : QuestionStatus.RAW,
       ingestionSource: QuestionIngestionSource.PDF,
       hasMedia: false,
     });

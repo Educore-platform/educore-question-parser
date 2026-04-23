@@ -31,7 +31,10 @@ export class DocumentsController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete a document (not yet implemented — Cloudinary cleanup pending)' })
+  @ApiOperation({
+    summary:
+      'Delete a document (not yet implemented — Cloudinary cleanup pending)',
+  })
   remove() {
     throw new HttpException(
       'Document deletion not yet implemented — Cloudinary coordination is pending',

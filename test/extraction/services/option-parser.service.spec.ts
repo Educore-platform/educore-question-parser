@@ -28,10 +28,7 @@ describe('OptionParserService', () => {
     });
 
     it('accepts a dot after the label', () => {
-      const result = service.parseOptions([
-        'A. one',
-        'B. two',
-      ]);
+      const result = service.parseOptions(['A. one', 'B. two']);
 
       expect(result.valid).toBe(true);
       expect(result.options).toHaveLength(2);
@@ -55,11 +52,7 @@ describe('OptionParserService', () => {
     });
 
     it('marks invalid when labels are not consecutive A, B, C, …', () => {
-      const result = service.parseOptions([
-        'A) ok',
-        'B) ok',
-        'D) skipped C',
-      ]);
+      const result = service.parseOptions(['A) ok', 'B) ok', 'D) skipped C']);
 
       expect(result.valid).toBe(false);
     });

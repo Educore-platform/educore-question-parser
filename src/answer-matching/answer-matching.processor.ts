@@ -60,7 +60,9 @@ export class AnswerMatchingProcessor extends WorkerHost {
       this.questionRepo.update(id, {
         answer:
           answersMap[
-            String(questions.find((question) => question.id === id)!.questionNumber)
+            String(
+              questions.find((question) => question.id === id)!.questionNumber,
+            )
           ],
         status: QuestionStatus.ANSWER_MATCHED,
       }),

@@ -5,14 +5,14 @@ import { TextItem } from '../interfaces/extraction.interfaces';
 @Injectable()
 export class PdfLoaderService {
   private readonly logger = new Logger(PdfLoaderService.name);
-  private pdfjsLib: typeof import('pdfjs-dist/legacy/build/pdf.mjs') | null = null;
+  private pdfjsLib: typeof import('pdfjs-dist/legacy/build/pdf.mjs') | null =
+    null;
 
   private async getPdfjs() {
     if (!this.pdfjsLib) {
       this.pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
-      this.pdfjsLib.GlobalWorkerOptions.workerSrc = require.resolve(
-        'pdfjs-dist/legacy/build/pdf.worker.mjs'
-      );
+      this.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        require.resolve('pdfjs-dist/legacy/build/pdf.worker.mjs');
     }
     return this.pdfjsLib;
   }
@@ -48,7 +48,7 @@ export class PdfLoaderService {
           items: textContent.items as unknown as TextItem[],
           proxy: page,
         };
-      })
+      }),
     );
 
     return { numPages: pdfDocument.numPages, pages };

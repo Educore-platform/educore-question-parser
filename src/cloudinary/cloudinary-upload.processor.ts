@@ -8,7 +8,11 @@ import pLimit from 'p-limit';
 import { ConfigService } from '@nestjs/config';
 import { Document } from '../model/entities/document.entity';
 import { CloudinaryStatus } from '../model/entities/enums';
-import { QUEUE_NAMES, CloudinaryImageBatchPayload, CloudinaryPdfUploadPayload } from '../shared/queues/queue-names';
+import {
+  QUEUE_NAMES,
+  CloudinaryImageBatchPayload,
+  CloudinaryPdfUploadPayload,
+} from '../shared/queues/queue-names';
 import { CloudinaryService } from '../shared/cloudinary/cloudinary.service';
 
 function isImageBatchPayload(
@@ -52,12 +56,23 @@ export class CloudinaryUploadProcessor extends WorkerHost {
     await this.processPdf(job.data);
   }
 
-  private async processImageBatch(payload: CloudinaryImageBatchPayload): Promise<void> {
-    const concurrency = this.configService.get<number>('cloudinary.uploadConcurrency', 5);
+  private async processImageBatch(
+    payload: CloudinaryImageBatchPayload,
+  ): Promise<void> {
+    const concurrency = this.configService.get<number>(
+      'cloudinary.uploadConcurrency',
+      5,
+    );
     const limit = pLimit(concurrency);
     await Promise.all(
       payload.items.map((item) =>
-        limit(() => this.processImageItem(payload.paperId, item.documentId, item.localPath)),
+        limit(() =>
+          this.processImageItem(
+            payload.paperId,
+            item.documentId,
+            item.localPath,
+          ),
+        ),
       ),
     );
   }
@@ -82,7 +97,10 @@ export class CloudinaryUploadProcessor extends WorkerHost {
       });
       await unlink(localPath);
     } catch (err) {
-      this.logger.error(`Cloudinary upload failed for document ${documentId}`, err);
+      this.logger.error(
+        `Cloudinary upload failed for document ${documentId}`,
+        err,
+      );
       await this.documentRepo.update(documentId, {
         cloudinaryStatus: CloudinaryStatus.FAILED,
       });
@@ -105,7 +123,10 @@ export class CloudinaryUploadProcessor extends WorkerHost {
       });
       await unlink(payload.localPath);
     } catch (err) {
-      this.logger.error(`Cloudinary PDF upload failed for paper ${payload.paperId}`, err);
+      this.logger.error(
+        `Cloudinary PDF upload failed for paper ${payload.paperId}`,
+        err,
+      );
       await this.documentRepo.update(payload.documentId, {
         cloudinaryStatus: CloudinaryStatus.FAILED,
       });

@@ -43,7 +43,10 @@ async function bootstrap() {
       .addTag('exam-types', 'Exam type management')
       .addTag('papers', 'Exam paper management')
       .addTag('questions', 'Exam question retrieval and management')
-      .addTag('ai-processed-questions', 'AI-enriched question review and correction')
+      .addTag(
+        'ai-processed-questions',
+        'AI-enriched question review and correction',
+      )
       .addTag('documents', 'Document file management')
       .addTag('invalid-exam-questions', 'Invalid / rejected question records')
       .build();
@@ -68,4 +71,3 @@ async function bootstrap() {
 }
 
 void bootstrap();
-

@@ -13,29 +13,33 @@ export class ExamQuestionRepository extends BaseRepository<ExamQuestion> {
   }
 
   async claimQuestionsForEnrichment(limit: number): Promise<ExamQuestion[]> {
-  return this.manager.transaction(async (em) => {
-    const claimed = await em
-      .createQueryBuilder(ExamQuestion, 'q')
-      .select('q.id')
-      .where('q.status IN (:...statuses)', {
-        statuses: [QuestionStatus.ANSWER_MATCHED, QuestionStatus.LATEX_DONE],
-      })
-      .orderBy('q.createdAt', 'ASC')
-      .take(limit)
-      .setLock('pessimistic_write')
-      .setOnLocked('skip_locked')
-      .getMany();
+    return this.manager.transaction(async (em) => {
+      const claimed = await em
+        .createQueryBuilder(ExamQuestion, 'q')
+        .select('q.id')
+        .where('q.status IN (:...statuses)', {
+          statuses: [QuestionStatus.ANSWER_MATCHED, QuestionStatus.LATEX_DONE],
+        })
+        .orderBy('q.createdAt', 'ASC')
+        .take(limit)
+        .setLock('pessimistic_write')
+        .setOnLocked('skip_locked')
+        .getMany();
 
-    if (!claimed.length) return [];
+      if (!claimed.length) return [];
 
-    const ids = claimed.map((q) => q.id);
+      const ids = claimed.map((q) => q.id);
 
-    await em.update(ExamQuestion, { id: In(ids) }, { status: QuestionStatus.ENRICHING });
+      await em.update(
+        ExamQuestion,
+        { id: In(ids) },
+        { status: QuestionStatus.ENRICHING },
+      );
 
-    return em.find(ExamQuestion, {
-      where: { id: In(ids) },
-      relations: ['subject', 'examPaper'],
+      return em.find(ExamQuestion, {
+        where: { id: In(ids) },
+        relations: ['subject', 'examPaper'],
+      });
     });
-  });
-}
+  }
 }

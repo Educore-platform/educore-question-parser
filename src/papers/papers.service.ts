@@ -50,7 +50,6 @@ export class PapersService {
     private readonly documentsService: DocumentsService,
   ) {}
 
-
   private async unlinkQuiet(path: string): Promise<void> {
     try {
       await unlink(path);
@@ -68,7 +67,6 @@ export class PapersService {
     const exists = await this.subjectRepo.existsBy({ id: subjectId });
     if (!exists) throw new BadRequestException('Subject not found');
   }
-
 
   async createPaper(
     file: Express.Multer.File,
@@ -165,7 +163,11 @@ export class PapersService {
     qb.skip(skip).take(take).orderBy('paper.createdAt', 'DESC');
 
     const [items, total] = await qb.getManyAndCount();
-    return PaginatedResponseDto.of(items as ExamPaperListItemDto[], total, filter);
+    return PaginatedResponseDto.of(
+      items as ExamPaperListItemDto[],
+      total,
+      filter,
+    );
   }
 
   async findOne(id: string): Promise<ExamPaper> {

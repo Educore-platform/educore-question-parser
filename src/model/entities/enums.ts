@@ -3,7 +3,7 @@ export enum ExamPaperStatus {
   PROCESSING = 'processing',
   EXTRACTED = 'extracted',
   ENRICHED = 'enriched',
-  FAILED = 'failed', 
+  FAILED = 'failed',
   PARTIALLY_ENRICHED = 'partially_enriched',
 }
 

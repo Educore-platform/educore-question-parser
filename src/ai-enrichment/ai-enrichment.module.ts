@@ -18,7 +18,11 @@ import { AI_ENRICHMENT_JOB_OPTIONS } from '../shared/queues/queue-defaults';
 @Module({
   imports: [
     ConfigModule,
-    TypeOrmModule.forFeature([ExamQuestion, AiProcessedExamQuestion, ExamPaper]),
+    TypeOrmModule.forFeature([
+      ExamQuestion,
+      AiProcessedExamQuestion,
+      ExamPaper,
+    ]),
     // Own queue — terminal stage, no next queue registered
     BullModule.registerQueue({
       name: QUEUE_NAMES.AI_ENRICHMENT,

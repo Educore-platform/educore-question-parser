@@ -96,7 +96,9 @@ describe('ValidatorService', () => {
       const result = await service.validate(draft, 1);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.includes('Non-sequential'))).toBe(true);
+      expect(result.errors.some((e) => e.includes('Non-sequential'))).toBe(
+        true,
+      );
       expect(invalidExamRepo.save).toHaveBeenCalled();
     });
 
@@ -108,7 +110,9 @@ describe('ValidatorService', () => {
       const result = await service.validate(draft, 1);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.includes('Too few options'))).toBe(true);
+      expect(result.errors.some((e) => e.includes('Too few options'))).toBe(
+        true,
+      );
     });
   });
 });

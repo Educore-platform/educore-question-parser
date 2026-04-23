@@ -35,4 +35,3 @@ export default () => ({
     uploadConcurrency: Number(process.env.CLOUDINARY_UPLOAD_CONCURRENCY ?? 5),
   },
 });
-

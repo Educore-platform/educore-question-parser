@@ -1,6 +1,6 @@
 export interface QuestionOption {
-  label: string;        // "A" | "B" | "C" | "D" | "E"
-  text: string;         // plain / best-effort text
+  label: string; // "A" | "B" | "C" | "D" | "E"
+  text: string; // plain / best-effort text
   latex: string | null; // null if not applicable
 }
 
@@ -39,7 +39,10 @@ export interface DocumentMetaTable {
   question_y: number | null;
 }
 
-export type DocumentMeta = DocumentMetaPdf | DocumentMetaImage | DocumentMetaTable;
+export type DocumentMeta =
+  | DocumentMetaPdf
+  | DocumentMetaImage
+  | DocumentMetaTable;
 
 export interface EnrichedQuestion {
   id: string;
@@ -51,4 +54,3 @@ export interface EnrichedQuestion {
   topic: string | null;
   relatedTopic: string | null;
 }
-

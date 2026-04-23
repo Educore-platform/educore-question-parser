@@ -9,10 +9,7 @@ describe('PapersController', () => {
   let papersService: jest.Mocked<
     Pick<
       PapersService,
-      | 'createPaper'
-      | 'findOne'
-      | 'getPaperStatus'
-      | 'getPaperQuestions'
+      'createPaper' | 'findOne' | 'getPaperStatus' | 'getPaperQuestions'
     >
   >;
 
@@ -35,10 +32,7 @@ describe('PapersController', () => {
     controller = module.get<PapersController>(PapersController);
   });
 
-  function mockFile(
-    path: string,
-    originalname = 'a.pdf',
-  ): Express.Multer.File {
+  function mockFile(path: string, originalname = 'a.pdf'): Express.Multer.File {
     return {
       fieldname: 'files',
       originalname,
@@ -67,8 +61,9 @@ describe('PapersController', () => {
         }),
       ).rejects.toThrow('No files uploaded');
 
-      await expect(controller.upload([], { items: [{ examTypeId, subjectId }] }))
-        .rejects.toThrow(BadRequestException);
+      await expect(
+        controller.upload([], { items: [{ examTypeId, subjectId }] }),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('throws when items length does not match files length', async () => {
@@ -158,9 +153,9 @@ describe('PapersController', () => {
       papersService.getPaperQuestions.mockResolvedValue([] as never);
 
       const query = { page: 1, pageSize: 20, year: '2023' } as never;
-      await expect(
-        controller.getPaperQuestions('p4', query),
-      ).resolves.toEqual([]);
+      await expect(controller.getPaperQuestions('p4', query)).resolves.toEqual(
+        [],
+      );
       expect(papersService.getPaperQuestions).toHaveBeenCalledWith('p4', query);
     });
   });

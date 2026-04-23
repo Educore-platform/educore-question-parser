@@ -1,6 +1,9 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
-import { QUEUE_NAMES, PdfExtractionJobPayload } from '../shared/queues/queue-names';
+import {
+  QUEUE_NAMES,
+  PdfExtractionJobPayload,
+} from '../shared/queues/queue-names';
 import { ExtractionOrchestrator } from './extraction.orchestrator';
 
 @Processor(QUEUE_NAMES.PDF_EXTRACTION)

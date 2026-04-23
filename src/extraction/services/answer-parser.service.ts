@@ -9,14 +9,22 @@ const ANSWER_FIRST_PATTERN = /\b([A-E])\s+(\d{1,3})[.)]/g;
 
 @Injectable()
 export class AnswerParserService {
-  parseAnswers(segmentText: string, paperId: string, year: string): AnswerKeyDraft[] {
+  parseAnswers(
+    segmentText: string,
+    paperId: string,
+    year: string,
+  ): AnswerKeyDraft[] {
     const numberFirst = this.matchNumberFirst(segmentText, paperId, year);
     if (numberFirst.length > 0) return numberFirst;
 
     return this.matchAnswerFirst(segmentText, paperId, year);
   }
 
-  private matchNumberFirst(text: string, paperId: string, year: string): AnswerKeyDraft[] {
+  private matchNumberFirst(
+    text: string,
+    paperId: string,
+    year: string,
+  ): AnswerKeyDraft[] {
     const answers: AnswerKeyDraft[] = [];
     for (const match of text.matchAll(NUMBER_FIRST_PATTERN)) {
       answers.push({
@@ -29,7 +37,11 @@ export class AnswerParserService {
     return answers;
   }
 
-  private matchAnswerFirst(text: string, paperId: string, year: string): AnswerKeyDraft[] {
+  private matchAnswerFirst(
+    text: string,
+    paperId: string,
+    year: string,
+  ): AnswerKeyDraft[] {
     const answers: AnswerKeyDraft[] = [];
     for (const match of text.matchAll(ANSWER_FIRST_PATTERN)) {
       answers.push({

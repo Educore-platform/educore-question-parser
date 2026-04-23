@@ -59,8 +59,14 @@ describe('CloudinaryUploadProcessor', () => {
     const payload: CloudinaryImageBatchPayload = {
       paperId: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
       items: [
-        { documentId: '11111111-1111-1111-1111-111111111111', localPath: '/tmp/a.png' },
-        { documentId: '22222222-2222-2222-2222-222222222222', localPath: '/tmp/b.png' },
+        {
+          documentId: '11111111-1111-1111-1111-111111111111',
+          localPath: '/tmp/a.png',
+        },
+        {
+          documentId: '22222222-2222-2222-2222-222222222222',
+          localPath: '/tmp/b.png',
+        },
       ],
     };
 
@@ -76,12 +82,15 @@ describe('CloudinaryUploadProcessor', () => {
       '11111111-1111-1111-1111-111111111111',
     );
     expect(documentRepo.update).toHaveBeenCalledTimes(2);
-    expect(documentRepo.update).toHaveBeenCalledWith('11111111-1111-1111-1111-111111111111', {
-      cloudinaryUrl: 'https://example.com/x',
-      cloudinaryPublicId: 'folder/x',
-      cloudinaryStatus: CloudinaryStatus.UPLOADED,
-      storagePath: null,
-    });
+    expect(documentRepo.update).toHaveBeenCalledWith(
+      '11111111-1111-1111-1111-111111111111',
+      {
+        cloudinaryUrl: 'https://example.com/x',
+        cloudinaryPublicId: 'folder/x',
+        cloudinaryStatus: CloudinaryStatus.UPLOADED,
+        storagePath: null,
+      },
+    );
     expect(unlink).toHaveBeenCalledWith('/tmp/a.png');
     expect(unlink).toHaveBeenCalledWith('/tmp/b.png');
   });
@@ -97,22 +106,36 @@ describe('CloudinaryUploadProcessor', () => {
     const payload: CloudinaryImageBatchPayload = {
       paperId: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
       items: [
-        { documentId: '11111111-1111-1111-1111-111111111111', localPath: '/tmp/a.png' },
-        { documentId: '22222222-2222-2222-2222-222222222222', localPath: '/tmp/b.png' },
+        {
+          documentId: '11111111-1111-1111-1111-111111111111',
+          localPath: '/tmp/a.png',
+        },
+        {
+          documentId: '22222222-2222-2222-2222-222222222222',
+          localPath: '/tmp/b.png',
+        },
       ],
     };
 
-    await processor.process({ data: payload } as Job<CloudinaryImageBatchPayload>);
+    await processor.process({
+      data: payload,
+    } as Job<CloudinaryImageBatchPayload>);
 
-    expect(documentRepo.update).toHaveBeenCalledWith('11111111-1111-1111-1111-111111111111', {
-      cloudinaryUrl: 'https://example.com/ok',
-      cloudinaryPublicId: 'ok',
-      cloudinaryStatus: CloudinaryStatus.UPLOADED,
-      storagePath: null,
-    });
-    expect(documentRepo.update).toHaveBeenCalledWith('22222222-2222-2222-2222-222222222222', {
-      cloudinaryStatus: CloudinaryStatus.FAILED,
-    });
+    expect(documentRepo.update).toHaveBeenCalledWith(
+      '11111111-1111-1111-1111-111111111111',
+      {
+        cloudinaryUrl: 'https://example.com/ok',
+        cloudinaryPublicId: 'ok',
+        cloudinaryStatus: CloudinaryStatus.UPLOADED,
+        storagePath: null,
+      },
+    );
+    expect(documentRepo.update).toHaveBeenCalledWith(
+      '22222222-2222-2222-2222-222222222222',
+      {
+        cloudinaryStatus: CloudinaryStatus.FAILED,
+      },
+    );
     expect(unlink).toHaveBeenCalledWith('/tmp/a.png');
     expect(unlink).not.toHaveBeenCalledWith('/tmp/b.png');
   });
@@ -124,19 +147,24 @@ describe('CloudinaryUploadProcessor', () => {
       localPath: '/uploads/file.pdf',
     };
 
-    await processor.process({ data: payload } as Job<CloudinaryPdfUploadPayload>);
+    await processor.process({
+      data: payload,
+    } as Job<CloudinaryPdfUploadPayload>);
 
     expect(cloudinaryService.uploadFile).toHaveBeenCalledWith(
       '/uploads/file.pdf',
       'educore/papers/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/pdf',
       'dddddddd-dddd-dddd-dddd-dddddddddddd',
     );
-    expect(documentRepo.update).toHaveBeenCalledWith('dddddddd-dddd-dddd-dddd-dddddddddddd', {
-      cloudinaryUrl: 'https://example.com/x',
-      cloudinaryPublicId: 'folder/x',
-      cloudinaryStatus: CloudinaryStatus.UPLOADED,
-      storagePath: null,
-    });
+    expect(documentRepo.update).toHaveBeenCalledWith(
+      'dddddddd-dddd-dddd-dddd-dddddddddddd',
+      {
+        cloudinaryUrl: 'https://example.com/x',
+        cloudinaryPublicId: 'folder/x',
+        cloudinaryStatus: CloudinaryStatus.UPLOADED,
+        storagePath: null,
+      },
+    );
     expect(unlink).toHaveBeenCalledWith('/uploads/file.pdf');
   });
 });

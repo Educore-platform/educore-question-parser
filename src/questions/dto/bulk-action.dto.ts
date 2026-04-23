@@ -10,9 +10,11 @@ export class BulkActionDto {
   @IsEnum(QuestionBulkAction)
   action: QuestionBulkAction;
 
-  @ApiProperty({ description: 'Array of question UUIDs to act on', type: [String] })
+  @ApiProperty({
+    description: 'Array of question UUIDs to act on',
+    type: [String],
+  })
   @IsArray()
   @IsUUID('all', { each: true })
   questionIds: string[];
 }
-

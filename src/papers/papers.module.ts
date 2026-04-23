@@ -23,7 +23,10 @@ import { QUEUE_NAMES } from '../shared/queues/queue-names';
         dest: config.get<string>('upload.dir'),
         fileFilter: (req, file, cb) => {
           if (file.mimetype !== 'application/pdf') {
-            return cb(new BadRequestException('Only PDF files are accepted'), false);
+            return cb(
+              new BadRequestException('Only PDF files are accepted'),
+              false,
+            );
           }
           cb(null, true);
         },

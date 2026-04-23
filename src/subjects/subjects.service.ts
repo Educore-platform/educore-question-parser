@@ -2,7 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Subject } from '../model/entities/subject.entity';
-import { PaginatedResponseDto, PaginationQueryDto } from '../shared/dto/pagination.dto';
+import {
+  PaginatedResponseDto,
+  PaginationQueryDto,
+} from '../shared/dto/pagination.dto';
 import { paginationOptions } from '../shared/utils/paginate.util';
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { UpdateSubjectDto } from './dto/update-subject.dto';
@@ -15,7 +18,9 @@ export class SubjectsService {
     private readonly subjectRepo: Repository<Subject>,
   ) {}
 
-  async findAll(query: PaginationQueryDto): Promise<PaginatedResponseDto<SubjectListItemDto>> {
+  async findAll(
+    query: PaginationQueryDto,
+  ): Promise<PaginatedResponseDto<SubjectListItemDto>> {
     const [items, total] = await this.subjectRepo.findAndCount({
       select: ['id', 'name', 'createdAt'],
       order: { name: 'ASC' },

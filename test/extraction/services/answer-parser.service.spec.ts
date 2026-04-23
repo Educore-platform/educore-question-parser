@@ -36,9 +36,7 @@ describe('AnswerParserService', () => {
     });
 
     it('accepts number-first with closing parenthesis delimiter', () => {
-      expect(
-        service.parseAnswers('10) D\n11) E', paperId, year),
-      ).toEqual([
+      expect(service.parseAnswers('10) D\n11) E', paperId, year)).toEqual([
         { paperId, year, questionNumber: 10, correctOption: 'D' },
         { paperId, year, questionNumber: 11, correctOption: 'E' },
       ]);
@@ -66,7 +64,9 @@ describe('AnswerParserService', () => {
     });
 
     it('returns empty array when nothing matches', () => {
-      expect(service.parseAnswers('no answers here', paperId, year)).toEqual([]);
+      expect(service.parseAnswers('no answers here', paperId, year)).toEqual(
+        [],
+      );
     });
   });
 });

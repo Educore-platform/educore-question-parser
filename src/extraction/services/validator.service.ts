@@ -1,5 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { QuestionValidationDraft, ValidationResult } from '../interfaces/extraction.interfaces';
+import {
+  QuestionValidationDraft,
+  ValidationResult,
+} from '../interfaces/extraction.interfaces';
 import { InvalidExamQuestionRepository } from '../../model/repositories/invalid-exam-question.repository';
 
 const VALID_OPTION_SEQUENCE = ['A', 'B', 'C', 'D', 'E'];
@@ -14,7 +17,10 @@ export class ValidatorService {
     private readonly invalidExamRepo: InvalidExamQuestionRepository,
   ) {}
 
-  async validate(draft: QuestionValidationDraft, pageNumber: number): Promise<ValidationResult> {
+  async validate(
+    draft: QuestionValidationDraft,
+    pageNumber: number,
+  ): Promise<ValidationResult> {
     const errors = this.runChecks(draft);
 
     if (errors.length > 0) {
@@ -38,7 +44,10 @@ export class ValidatorService {
       errors.push('Invalid question number');
     }
 
-    if (!draft.questionText || draft.questionText.trim().length < MIN_QUESTION_TEXT_LENGTH) {
+    if (
+      !draft.questionText ||
+      draft.questionText.trim().length < MIN_QUESTION_TEXT_LENGTH
+    ) {
       errors.push('Question text too short or empty');
     }
 
@@ -53,7 +62,9 @@ export class ValidatorService {
 
     const labels = draft.options.map((o) => o.label);
     const expectedSequence = VALID_OPTION_SEQUENCE.slice(0, labels.length);
-    const isSequential = labels.every((label, i) => label === expectedSequence[i]);
+    const isSequential = labels.every(
+      (label, i) => label === expectedSequence[i],
+    );
 
     if (!isSequential) {
       errors.push(`Non-sequential option labels: [${labels.join(', ')}]`);

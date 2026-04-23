@@ -47,7 +47,12 @@ export class ExamPaper extends BaseEntity {
   })
   status: ExamPaperStatus;
 
-  @Column({ name: 'failure_reason', type: 'text', nullable: true, default: null })
+  @Column({
+    name: 'failure_reason',
+    type: 'text',
+    nullable: true,
+    default: null,
+  })
   failureReason: string | null;
 
   @Column({ name: 'total_pages', type: 'int', nullable: true, default: null })

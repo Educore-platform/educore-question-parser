@@ -10,9 +10,7 @@ import {
 
 describe('QuestionPersistenceService', () => {
   let service: QuestionPersistenceService;
-  let repo: jest.Mocked<
-    Pick<Repository<ExamQuestion>, 'create' | 'save'>
-  >;
+  let repo: jest.Mocked<Pick<Repository<ExamQuestion>, 'create' | 'save'>>;
 
   beforeEach(async () => {
     repo = {

@@ -34,10 +34,7 @@ describe('PapersService', () => {
   let subjectRepo: jest.Mocked<Pick<Repository<Subject>, 'existsBy'>>;
   let dataSource: { transaction: jest.Mock };
   let documentsService: jest.Mocked<
-    Pick<
-      DocumentsService,
-      'hashFile' | 'isDuplicate' | 'rememberHash'
-    >
+    Pick<DocumentsService, 'hashFile' | 'isDuplicate' | 'rememberHash'>
   >;
 
   const examTypeId = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
@@ -74,16 +71,18 @@ describe('PapersService', () => {
     dataSource = {
       transaction: jest.fn(async (fn) => {
         const em = {
-          save: jest.fn(async (_entity: unknown, row: Record<string, unknown>) => {
-            if ('examTypeId' in row) {
-              return {
-                ...row,
-                id: paperId,
-                status: ExamPaperStatus.PENDING,
-              } as ExamPaper;
-            }
-            return {} as Document;
-          }),
+          save: jest.fn(
+            async (_entity: unknown, row: Record<string, unknown>) => {
+              if ('examTypeId' in row) {
+                return {
+                  ...row,
+                  id: paperId,
+                  status: ExamPaperStatus.PENDING,
+                } as ExamPaper;
+              }
+              return {} as Document;
+            },
+          ),
         };
         return fn(em);
       }),

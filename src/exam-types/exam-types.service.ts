@@ -2,7 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ExamType } from '../model/entities/exam-type.entity';
-import { PaginatedResponseDto, PaginationQueryDto } from '../shared/dto/pagination.dto';
+import {
+  PaginatedResponseDto,
+  PaginationQueryDto,
+} from '../shared/dto/pagination.dto';
 import { paginationOptions } from '../shared/utils/paginate.util';
 import { CreateExamTypeDto } from './dto/create-exam-type.dto';
 import { UpdateExamTypeDto } from './dto/update-exam-type.dto';
@@ -15,13 +18,19 @@ export class ExamTypesService {
     private readonly examTypeRepo: Repository<ExamType>,
   ) {}
 
-  async findAll(query: PaginationQueryDto): Promise<PaginatedResponseDto<ExamTypeListItemDto>> {
+  async findAll(
+    query: PaginationQueryDto,
+  ): Promise<PaginatedResponseDto<ExamTypeListItemDto>> {
     const [items, total] = await this.examTypeRepo.findAndCount({
       select: ['id', 'name', 'createdAt'],
       order: { name: 'ASC' },
       ...paginationOptions(query),
     });
-    return PaginatedResponseDto.of(items as ExamTypeListItemDto[], total, query);
+    return PaginatedResponseDto.of(
+      items as ExamTypeListItemDto[],
+      total,
+      query,
+    );
   }
 
   async findOne(id: string): Promise<ExamType> {

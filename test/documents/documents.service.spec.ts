@@ -6,10 +6,7 @@ import {
   PDF_SHA256_REDIS_PREFIX,
 } from '../../src/documents/documents.service';
 import { Document } from '../../src/model/entities/document.entity';
-import {
-  DocumentSource,
-  DocumentType,
-} from '../../src/model/entities/enums';
+import { DocumentSource, DocumentType } from '../../src/model/entities/enums';
 import { RedisService } from '../../src/shared/redis/redis.service';
 
 describe('DocumentsService', () => {

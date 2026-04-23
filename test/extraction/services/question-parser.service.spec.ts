@@ -57,10 +57,7 @@ describe('QuestionParserService', () => {
 
     it('flushes the previous question when a new question line appears', () => {
       const state = service.initialState();
-      const result = service.parseSegment(
-        '1. One\n2. Two\n3. Three',
-        state,
-      );
+      const result = service.parseSegment('1. One\n2. Two\n3. Three', state);
 
       expect(result.completedQuestions.map((q) => q.questionNumber)).toEqual([
         1, 2,
@@ -103,7 +100,9 @@ describe('QuestionParserService', () => {
         lastQuestionNumber: 0,
         awaitingContinuation: true,
       };
-      const result = { completedQuestions: [] as { questionNumber: number; rawText: string }[] };
+      const result = {
+        completedQuestions: [] as { questionNumber: number; rawText: string }[],
+      };
 
       service.flushQuestion(state, result);
 
@@ -117,7 +116,9 @@ describe('QuestionParserService', () => {
 
     it('does nothing when there is no active question', () => {
       const state = service.initialState();
-      const result = { completedQuestions: [] as { questionNumber: number; rawText: string }[] };
+      const result = {
+        completedQuestions: [] as { questionNumber: number; rawText: string }[],
+      };
 
       service.flushQuestion(state, result);
 

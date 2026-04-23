@@ -34,7 +34,9 @@ export class CreateQuestionDto {
   @IsNotEmpty()
   questionText: string;
 
-  @ApiPropertyOptional({ description: 'LaTeX representation of the question (optional)' })
+  @ApiPropertyOptional({
+    description: 'LaTeX representation of the question (optional)',
+  })
   @IsOptional()
   @IsString()
   questionLatex?: string;

@@ -34,7 +34,10 @@ export class PaginatedResponseDto<T> {
   @ApiProperty({ description: 'Array of items for the current page' })
   items: T[];
 
-  @ApiProperty({ description: 'Total number of matching records', example: 150 })
+  @ApiProperty({
+    description: 'Total number of matching records',
+    example: 150,
+  })
   total: number;
 
   @ApiProperty({ description: 'Current page number (1-based)', example: 1 })
@@ -49,7 +52,10 @@ export class PaginatedResponseDto<T> {
   @ApiProperty({ description: 'Whether a next page exists', example: true })
   hasNextPage: boolean;
 
-  @ApiProperty({ description: 'Whether a previous page exists', example: false })
+  @ApiProperty({
+    description: 'Whether a previous page exists',
+    example: false,
+  })
   hasPrevPage: boolean;
 
   /**

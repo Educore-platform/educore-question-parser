@@ -66,9 +66,7 @@ function twoPagePdf(body: string) {
 describe('ExtractionOrchestrator', () => {
   let orchestrator: ExtractionOrchestrator;
   let questionParser: QuestionParserService;
-  let examPaperRepo: jest.Mocked<
-    Pick<Repository<ExamPaper>, 'update'>
-  >;
+  let examPaperRepo: jest.Mocked<Pick<Repository<ExamPaper>, 'update'>>;
   let documentRepo: { update: jest.Mock; findOne: jest.Mock };
   let pdfLoader: jest.Mocked<Pick<PdfLoaderService, 'loadPdf'>>;
   let pageClassifier: jest.Mocked<Pick<PageClassifierService, 'classify'>>;
@@ -211,7 +209,9 @@ describe('ExtractionOrchestrator', () => {
 
       pageClassifier.classify.mockReturnValue({
         type: 'SINGLE',
-        segments: [{ side: 'FULL', items: [textItem(validTwoQuestionsBody, 400)] }],
+        segments: [
+          { side: 'FULL', items: [textItem(validTwoQuestionsBody, 400)] },
+        ],
       });
 
       const path = '/tmp/file.pdf';
@@ -246,7 +246,9 @@ describe('ExtractionOrchestrator', () => {
 
       pageClassifier.classify.mockReturnValue({
         type: 'SINGLE',
-        segments: [{ side: 'FULL', items: [textItem(validTwoQuestionsBody, 400)] }],
+        segments: [
+          { side: 'FULL', items: [textItem(validTwoQuestionsBody, 400)] },
+        ],
       });
 
       const imgA = '11111111-1111-1111-1111-111111111111';
@@ -335,7 +337,7 @@ describe('ExtractionOrchestrator', () => {
       await orchestrator.processPaper(paperId, '/tmp/x.pdf');
 
       expect(parseSpy).toHaveBeenCalled();
-      const items = parseSpy.mock.calls[0][0] as TextItem[];
+      const items = parseSpy.mock.calls[0][0];
       expect(items[0].str.startsWith('top')).toBe(true);
 
       parseSpy.mockRestore();
@@ -390,10 +392,7 @@ describe('ExtractionOrchestrator', () => {
     });
 
     it('persists Unknown year when no year appears in the PDF text', async () => {
-      const body =
-        '1. Plain\n' +
-        'A) a\nB) b\nC) c\nD) d\nE) e\n' +
-        '2. Flush';
+      const body = '1. Plain\n' + 'A) a\nB) b\nC) c\nD) d\nE) e\n' + '2. Flush';
       pdfLoader.loadPdf.mockResolvedValue(twoPagePdf(body));
 
       pageClassifier.classify.mockReturnValue({
@@ -449,9 +448,7 @@ describe('ExtractionOrchestrator', () => {
 
     it('enqueues latex improvement when question or options contain math signals', async () => {
       const body =
-        '1. Solve x^2 = 4\n' +
-        'A) 1\nB) 2\nC) 3\nD) 4\nE) 5\n' +
-        '2. Done';
+        '1. Solve x^2 = 4\n' + 'A) 1\nB) 2\nC) 3\nD) 4\nE) 5\n' + '2. Done';
       pdfLoader.loadPdf.mockResolvedValue(twoPagePdf(body));
 
       pageClassifier.classify.mockReturnValue({
@@ -461,7 +458,10 @@ describe('ExtractionOrchestrator', () => {
 
       questionPersistence.savePaperResult.mockResolvedValue({
         questions: [
-          { id: questionId, status: QuestionStatus.LATEX_QUEUED } as ExamQuestion,
+          {
+            id: questionId,
+            status: QuestionStatus.LATEX_QUEUED,
+          } as ExamQuestion,
         ],
         documents: [],
       });
@@ -481,10 +481,7 @@ describe('ExtractionOrchestrator', () => {
     it('does not enqueue downstream jobs when segments produce no completed questions', async () => {
       pdfLoader.loadPdf.mockResolvedValue({
         numPages: 2,
-        pages: [
-          makePdfPage(1, []),
-          makePdfPage(2, [textItem('1. Only', 400)]),
-        ],
+        pages: [makePdfPage(1, []), makePdfPage(2, [textItem('1. Only', 400)])],
       });
 
       pageClassifier.classify.mockReturnValue({
@@ -510,7 +507,9 @@ describe('ExtractionOrchestrator', () => {
 
       pageClassifier.classify.mockReturnValue({
         type: 'SINGLE',
-        segments: [{ side: 'FULL', items: [textItem(validTwoQuestionsBody, 400)] }],
+        segments: [
+          { side: 'FULL', items: [textItem(validTwoQuestionsBody, 400)] },
+        ],
       });
 
       pdfStoragePathForMocks = '/tmp/invalid.pdf';
@@ -548,10 +547,10 @@ describe('ExtractionOrchestrator', () => {
       pdfStoragePathForMocks = '/tmp/with-answers.pdf';
       await orchestrator.processPaper(paperId, '/tmp/with-answers.pdf');
 
-      expect(redisHset).toHaveBeenCalledWith(
-        `answers:${paperId}:Unknown`,
-        { '1': 'A', '2': 'B' },
-      );
+      expect(redisHset).toHaveBeenCalledWith(`answers:${paperId}:Unknown`, {
+        '1': 'A',
+        '2': 'B',
+      });
     });
   });
 });

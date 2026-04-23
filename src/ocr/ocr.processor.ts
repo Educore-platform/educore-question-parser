@@ -6,7 +6,10 @@ import { Repository } from 'typeorm';
 import { OcrService } from './ocr.service';
 import { Document } from '../model/entities/document.entity';
 import { ExamQuestion } from '../model/entities/exam-question.entity';
-import { OcrScanningJobPayload, QUEUE_NAMES } from '../shared/queues/queue-names';
+import {
+  OcrScanningJobPayload,
+  QUEUE_NAMES,
+} from '../shared/queues/queue-names';
 import { DocumentMetaImage } from '../model/entities/interfaces';
 
 @Processor(QUEUE_NAMES.OCR_SCANNING)

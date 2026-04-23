@@ -4,7 +4,10 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { randomBytes } from 'node:crypto';
 
-import { AiEnrichmentJobPayload, QUEUE_NAMES } from '../shared/queues/queue-names';
+import {
+  AiEnrichmentJobPayload,
+  QUEUE_NAMES,
+} from '../shared/queues/queue-names';
 
 @Injectable()
 export class AiEnrichmentQueueService {
@@ -16,7 +19,9 @@ export class AiEnrichmentQueueService {
     @InjectQueue(QUEUE_NAMES.AI_ENRICHMENT)
     private readonly queue: Queue<AiEnrichmentJobPayload>,
   ) {
-    this.batchSize = this.configService.getOrThrow<number>('anthropic.batchSize');
+    this.batchSize = this.configService.getOrThrow<number>(
+      'anthropic.batchSize',
+    );
   }
 
   async enqueueBatches(questionIds: string[]): Promise<void> {
@@ -40,6 +45,8 @@ export class AiEnrichmentQueueService {
     }
 
     await this.queue.addBulk(jobs);
-    this.logger.log(`Enqueued ${jobs.length} enrichment batches for ${questionIds.length} questions`);
+    this.logger.log(
+      `Enqueued ${jobs.length} enrichment batches for ${questionIds.length} questions`,
+    );
   }
 }

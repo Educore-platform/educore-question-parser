@@ -1,5 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { TextItem, ParsedQuestion, ParseResult, ParserState, TextLine } from '../interfaces/extraction.interfaces';
+import {
+  TextItem,
+  ParsedQuestion,
+  ParseResult,
+  ParserState,
+  TextLine,
+} from '../interfaces/extraction.interfaces';
 
 const QUESTION_START_PATTERN = /^(\d{1,3})[.)]\s+(.+)/;
 
@@ -25,7 +31,11 @@ export class QuestionParserService {
       if (match) {
         this.flushQuestion(state, result);
         const [, number, textPart] = match;
-        state.currentQuestion = { questionNumber: Number.parseInt(number, 10), text: textPart, yPosition: y };
+        state.currentQuestion = {
+          questionNumber: Number.parseInt(number, 10),
+          text: textPart,
+          yPosition: y,
+        };
         state.awaitingContinuation = true;
         continue;
       }
@@ -46,9 +56,16 @@ export class QuestionParserService {
 
   private flushQuestion(state: ParserState, result: ParseResult): void {
     const q = state.currentQuestion;
-    if (q?.questionNumber === undefined || q.text === undefined || q.yPosition === undefined) return;
+    if (
+      q?.questionNumber === undefined ||
+      q.text === undefined ||
+      q.yPosition === undefined
+    )
+      return;
 
-    this.logger.debug(`Flushing question ${q.questionNumber} (${q.text.length} chars) at Y=${q.yPosition}`);
+    this.logger.debug(
+      `Flushing question ${q.questionNumber} (${q.text.length} chars) at Y=${q.yPosition}`,
+    );
 
     result.completedQuestions.push({
       questionNumber: q.questionNumber,

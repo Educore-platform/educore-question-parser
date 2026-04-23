@@ -28,7 +28,12 @@ export class ExamQuestion extends BaseEntity {
   @JoinColumn({ name: 'exam_paper_id' })
   examPaper: ExamPaper | null;
 
-  @Column({ name: 'exam_paper_id', type: 'uuid', nullable: true, default: null })
+  @Column({
+    name: 'exam_paper_id',
+    type: 'uuid',
+    nullable: true,
+    default: null,
+  })
   examPaperId: string | null;
 
   @ManyToOne(() => Subject, (subject) => subject.examQuestions, {
@@ -51,7 +56,12 @@ export class ExamQuestion extends BaseEntity {
   questionText: string;
 
   // Raw best-effort LaTeX from extraction; null until latex step runs
-  @Column({ name: 'question_latex', type: 'text', nullable: true, default: null })
+  @Column({
+    name: 'question_latex',
+    type: 'text',
+    nullable: true,
+    default: null,
+  })
   questionLatex: string | null;
 
   // [{ label, text, latex }]
@@ -69,7 +79,12 @@ export class ExamQuestion extends BaseEntity {
   pageNumber: number | null;
 
   // left | right | full | null
-  @Column({ name: 'column_position', type: 'varchar', nullable: true, default: null })
+  @Column({
+    name: 'column_position',
+    type: 'varchar',
+    nullable: true,
+    default: null,
+  })
   columnPosition: string | null;
 
   @Column({ name: 'ingestion_source', type: 'varchar', nullable: false })
@@ -78,7 +93,12 @@ export class ExamQuestion extends BaseEntity {
   @Column({ type: 'varchar', default: QuestionStatus.RAW })
   status: QuestionStatus;
 
-  @Column({ name: 'failure_reason', type: 'text', nullable: true, default: null })
+  @Column({
+    name: 'failure_reason',
+    type: 'text',
+    nullable: true,
+    default: null,
+  })
   failureReason: string | null;
 
   @OneToOne(

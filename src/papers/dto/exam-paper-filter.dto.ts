@@ -14,7 +14,10 @@ export class ExamPaperFilterDto extends PaginationQueryDto {
   @IsUUID()
   subjectId?: string;
 
-  @ApiPropertyOptional({ enum: ExamPaperStatus, description: 'Filter by processing status' })
+  @ApiPropertyOptional({
+    enum: ExamPaperStatus,
+    description: 'Filter by processing status',
+  })
   @IsOptional()
   @IsEnum(ExamPaperStatus)
   status?: ExamPaperStatus;

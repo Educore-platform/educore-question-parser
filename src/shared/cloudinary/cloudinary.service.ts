@@ -32,8 +32,8 @@ export class CloudinaryService {
 
     const result = await cloudinary.uploader.upload(localPath, options);
     return {
-      secureUrl: result.secure_url as string,
-      publicId: result.public_id as string,
+      secureUrl: result.secure_url,
+      publicId: result.public_id,
     };
   }
 }

@@ -19,7 +19,10 @@ export class QuestionFilterDto extends PaginationQueryDto {
   @IsString()
   year?: string;
 
-  @ApiPropertyOptional({ enum: QuestionStatus, description: 'Filter by question status' })
+  @ApiPropertyOptional({
+    enum: QuestionStatus,
+    description: 'Filter by question status',
+  })
   @IsOptional()
   @IsEnum(QuestionStatus)
   status?: QuestionStatus;

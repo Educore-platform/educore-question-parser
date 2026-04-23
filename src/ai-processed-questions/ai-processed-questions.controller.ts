@@ -11,20 +11,29 @@ export class AiProcessedQuestionsController {
   constructor(private readonly service: AiProcessedQuestionsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'List AI-processed questions (paginated, filterable)' })
+  @ApiOperation({
+    summary: 'List AI-processed questions (paginated, filterable)',
+  })
   findAll(@Query() filter: AiProcessedQuestionFilterDto) {
     return this.service.findAll(filter);
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get an AI-processed question by ID (no relations)' })
+  @ApiOperation({
+    summary: 'Get an AI-processed question by ID (no relations)',
+  })
   findOne(@Param() { id }: IdParamDto) {
     return this.service.findOne(id);
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Apply human corrections to an AI-processed question' })
-  update(@Param() { id }: IdParamDto, @Body() dto: UpdateAiProcessedQuestionDto) {
+  @ApiOperation({
+    summary: 'Apply human corrections to an AI-processed question',
+  })
+  update(
+    @Param() { id }: IdParamDto,
+    @Body() dto: UpdateAiProcessedQuestionDto,
+  ) {
     return this.service.update(id, dto);
   }
 }

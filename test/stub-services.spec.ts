@@ -15,7 +15,9 @@ import { LatexClassifierService } from '../src/extraction/services/latex-classif
 import { QuestionsService } from '../src/questions/questions.service';
 import { QuestionsController } from '../src/questions/questions.controller';
 
-async function resolvesProvider<T>(Cls: new (...args: unknown[]) => T): Promise<T> {
+async function resolvesProvider<T>(
+  Cls: new (...args: unknown[]) => T,
+): Promise<T> {
   const module: TestingModule = await Test.createTestingModule({
     providers: [Cls],
   }).compile();

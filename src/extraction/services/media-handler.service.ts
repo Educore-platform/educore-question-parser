@@ -3,7 +3,13 @@ import { ConfigService } from '@nestjs/config';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { createCanvas, ImageData } from 'canvas';
-import { TextItem, ExtractedImage, ExtractedTable, PdfJsImage, TableRow } from '../interfaces/extraction.interfaces';
+import {
+  TextItem,
+  ExtractedImage,
+  ExtractedTable,
+  PdfJsImage,
+  TableRow,
+} from '../interfaces/extraction.interfaces';
 
 const PDF_OPS = {
   TRANSFORM: 12,
@@ -45,7 +51,11 @@ export class MediaHandlerService implements OnModuleInit {
         continue;
       }
 
-      if (fn !== PDF_OPS.PAINT_IMAGE_XOBJECT && fn !== PDF_OPS.PAINT_INLINE_IMAGE_XOBJECT) continue;
+      if (
+        fn !== PDF_OPS.PAINT_IMAGE_XOBJECT &&
+        fn !== PDF_OPS.PAINT_INLINE_IMAGE_XOBJECT
+      )
+        continue;
 
       const imgName = args[0];
       try {
@@ -65,7 +75,10 @@ export class MediaHandlerService implements OnModuleInit {
           isScanned: false,
         });
       } catch (err) {
-        this.logger.error(`Failed to extract image ${imgName} on page ${pageNum}`, err);
+        this.logger.error(
+          `Failed to extract image ${imgName} on page ${pageNum}`,
+          err,
+        );
       }
     }
 
@@ -75,13 +88,18 @@ export class MediaHandlerService implements OnModuleInit {
   private async renderImageToBuffer(img: PdfJsImage): Promise<Buffer> {
     const canvas = createCanvas(img.width, img.height);
     const ctx = canvas.getContext('2d');
-    ctx.putImageData(new ImageData(new Uint8ClampedArray(img.data), img.width, img.height), 0, 0);
+    ctx.putImageData(
+      new ImageData(new Uint8ClampedArray(img.data), img.width, img.height),
+      0,
+      0,
+    );
     return canvas.toBuffer('image/png');
   }
 
   detectTables(items: TextItem[]): ExtractedTable[] {
-    const tableRows = this.groupByY(items, ROW_Y_TOLERANCE)
-      .filter((row) => row.items.length >= TABLE_MIN_COLS);
+    const tableRows = this.groupByY(items, ROW_Y_TOLERANCE).filter(
+      (row) => row.items.length >= TABLE_MIN_COLS,
+    );
 
     if (tableRows.length < TABLE_MIN_ROWS) return [];
 
@@ -93,12 +111,14 @@ export class MediaHandlerService implements OnModuleInit {
       if (gap < TABLE_ROW_GAP) {
         currentGroup.push(tableRows[i]);
       } else {
-        if (currentGroup.length >= TABLE_MIN_ROWS) tables.push(this.formatTable(currentGroup));
+        if (currentGroup.length >= TABLE_MIN_ROWS)
+          tables.push(this.formatTable(currentGroup));
         currentGroup = [tableRows[i]];
       }
     }
 
-    if (currentGroup.length >= TABLE_MIN_ROWS) tables.push(this.formatTable(currentGroup));
+    if (currentGroup.length >= TABLE_MIN_ROWS)
+      tables.push(this.formatTable(currentGroup));
 
     return tables;
   }
@@ -132,7 +152,10 @@ export class MediaHandlerService implements OnModuleInit {
     };
   }
 
-  isScannedImage(img: { width: number; height: number }, textItems: TextItem[]): boolean {
+  isScannedImage(
+    img: { width: number; height: number },
+    textItems: TextItem[],
+  ): boolean {
     return (
       img.width > SCANNED_MIN_DIMENSION &&
       img.height > SCANNED_MIN_DIMENSION &&

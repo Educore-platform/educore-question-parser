@@ -1,10 +1,4 @@
-import {
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  OneToOne,
-} from 'typeorm';
+import { Column, Entity, Index, JoinColumn, OneToOne } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { ExamQuestion } from './exam-question.entity';
 import { AiProcessedStatus } from './enums';

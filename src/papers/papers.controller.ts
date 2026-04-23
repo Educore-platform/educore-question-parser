@@ -14,7 +14,13 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiConsumes, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiConsumes,
+  ApiBody,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { PapersService } from './papers.service';
 import { UploadPapersBodyDto } from './dto/upload-papers.dto';
 import { GetPaperQuestionsQueryDto } from './dto/pagination-query.dto';

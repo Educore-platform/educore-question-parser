@@ -43,9 +43,13 @@ import { formatErrorForStorage } from '../shared/utils/error-storage.util';
 const ANSWER_KEY_ROW_PATTERN = /^[A-E]\s+\d+\.\s+[A-E]|^(\d+\.\s*[A-E]\s+){2,}/;
 const ANSWER_SECTION_PATTERN = /\b(answers?|answer\s*key|solutions?|ans\.?)\b/i;
 const WATERMARK_PATTERN = /\bwww\.\S+/gi;
-const PAPER_TYPE_QUESTION = /which\s+.*question\s+paper\s+type\s+is\s+given\s+to\s+you/i;
+const PAPER_TYPE_QUESTION =
+  /which\s+.*question\s+paper\s+type\s+is\s+given\s+to\s+you/i;
 
-type YearAdvanceResult = { year: string | null; flushedQuestions: ParsedQuestion[] };
+type YearAdvanceResult = {
+  year: string | null;
+  flushedQuestions: ParsedQuestion[];
+};
 
 @Injectable()
 export class ExtractionOrchestrator {
@@ -106,8 +110,14 @@ export class ExtractionOrchestrator {
 
         this.logger.debug(`Processing page ${page.pageNumber}/${numPages}`);
 
-        const layout = this.pageClassifier.classify(page.items, page.viewportWidth);
-        const extractedImages = await this.mediaHandler.extractImages(page.proxy, page.pageNumber);
+        const layout = this.pageClassifier.classify(
+          page.items,
+          page.viewportWidth,
+        );
+        const extractedImages = await this.mediaHandler.extractImages(
+          page.proxy,
+          page.pageNumber,
+        );
         const extractedTables = this.mediaHandler.detectTables(page.items);
 
         allMedia.push({
@@ -119,29 +129,42 @@ export class ExtractionOrchestrator {
 
         for (const segment of layout.segments) {
           if (!segment.items.length) continue;
-          const segmentPayloads = await this.processSegment(segment.items, context, page.pageNumber, paperId);
+          const segmentPayloads = await this.processSegment(
+            segment.items,
+            context,
+            page.pageNumber,
+            paperId,
+          );
           allQuestions.push(...segmentPayloads);
           if (context.currentYear) yearsDetected.add(context.currentYear);
         }
       }
 
-      const trailingQuestions = this.questionParser.finalFlush(context.parserState);
+      const trailingQuestions = this.questionParser.finalFlush(
+        context.parserState,
+      );
       if (trailingQuestions.length) {
         const lastPageNumber = pages.at(-1)?.pageNumber ?? numPages;
         for (const q of trailingQuestions) {
-          const payload = await this.prepareQuestion(q, context.currentYear, lastPageNumber, paperId);
+          const payload = await this.prepareQuestion(
+            q,
+            context.currentYear,
+            lastPageNumber,
+            paperId,
+          );
           if (payload) allQuestions.push(payload);
         }
       }
 
       const years = [...yearsDetected];
 
-      const { questions, documents } = await this.questionPersistence.savePaperResult({
-        paperId,
-        questions: allQuestions,
-        media: allMedia,
-        yearsDetected: years,
-      });
+      const { questions, documents } =
+        await this.questionPersistence.savePaperResult({
+          paperId,
+          questions: allQuestions,
+          media: allMedia,
+          yearsDetected: years,
+        });
 
       const latexJobs = questions
         .filter((q) => q.status === QuestionStatus.LATEX_QUEUED)
@@ -150,13 +173,17 @@ export class ExtractionOrchestrator {
           data: { questionId: q.id },
         }));
 
-      const answerJobs = years.map((year): { name: string; data: AnswerMatchingJobPayload } => ({
-        name: 'match',
-        data: { paperId, year },
-      }));
+      const answerJobs = years.map(
+        (year): { name: string; data: AnswerMatchingJobPayload } => ({
+          name: 'match',
+          data: { paperId, year },
+        }),
+      );
 
       const ocrJobs = documents
-        .filter((doc) => doc.type === DocumentType.SCANNED_IMAGE && doc.storagePath)
+        .filter(
+          (doc) => doc.type === DocumentType.SCANNED_IMAGE && doc.storagePath,
+        )
         .map((doc): { name: string; data: OcrScanningJobPayload } => ({
           name: 'ocr',
           data: { documentId: doc.id, filePath: doc.storagePath! },
@@ -166,8 +193,13 @@ export class ExtractionOrchestrator {
       if (answerJobs.length) await this.answerQueue.addBulk(answerJobs);
       if (ocrJobs.length) await this.ocrQueue.addBulk(ocrJobs);
 
-      const cloudinaryJobs = await this.buildCloudinaryUploadJobs(paperId, filePath, documents);
-      if (cloudinaryJobs.length) await this.cloudinaryQueue.addBulk(cloudinaryJobs);
+      const cloudinaryJobs = await this.buildCloudinaryUploadJobs(
+        paperId,
+        filePath,
+        documents,
+      );
+      if (cloudinaryJobs.length)
+        await this.cloudinaryQueue.addBulk(cloudinaryJobs);
 
       await this.examPaperRepo.update(paperId, {
         status: ExamPaperStatus.EXTRACTED,
@@ -220,19 +252,18 @@ export class ExtractionOrchestrator {
       },
     });
 
-    const pdfJobs =
-      pdfDoc?.storagePath
-        ? [
-            {
-              name: 'pdf',
-              data: {
-                paperId,
-                documentId: pdfDoc.id,
-                localPath: pdfDoc.storagePath,
-              } satisfies CloudinaryPdfUploadPayload,
-            },
-          ]
-        : [];
+    const pdfJobs = pdfDoc?.storagePath
+      ? [
+          {
+            name: 'pdf',
+            data: {
+              paperId,
+              documentId: pdfDoc.id,
+              localPath: pdfDoc.storagePath,
+            } satisfies CloudinaryPdfUploadPayload,
+          },
+        ]
+      : [];
 
     if (pdfDoc?.storagePath && filePath && pdfDoc.storagePath !== filePath) {
       this.logger.warn(
@@ -256,12 +287,21 @@ export class ExtractionOrchestrator {
       return [];
     }
 
-    const { year, flushedQuestions } = this.advanceYearContext(segmentText, context, pageNumber);
+    const { year, flushedQuestions } = this.advanceYearContext(
+      segmentText,
+      context,
+      pageNumber,
+    );
     context.currentYear = year;
 
     const boundaryPayloads: SaveQuestionPayload[] = [];
     for (const q of flushedQuestions) {
-      const payload = await this.prepareQuestion(q, context.currentYear, pageNumber, paperId);
+      const payload = await this.prepareQuestion(
+        q,
+        context.currentYear,
+        pageNumber,
+        paperId,
+      );
       if (payload) boundaryPayloads.push(payload);
     }
 
@@ -291,13 +331,23 @@ export class ExtractionOrchestrator {
       const answerPart = segmentText.slice(answerSectionMatch.index);
 
       const payloads = questionItems.length
-        ? await this.collectQuestions(questionItems, context, pageNumber, paperId)
+        ? await this.collectQuestions(
+            questionItems,
+            context,
+            pageNumber,
+            paperId,
+          )
         : [];
       await this.handleAnswerSection(answerPart, context, paperId);
       return [...boundaryPayloads, ...payloads];
     }
 
-    const segmentPayloads = await this.collectQuestions(items, context, pageNumber, paperId);
+    const segmentPayloads = await this.collectQuestions(
+      items,
+      context,
+      pageNumber,
+      paperId,
+    );
     return [...boundaryPayloads, ...segmentPayloads];
   }
 
@@ -307,11 +357,19 @@ export class ExtractionOrchestrator {
     pageNumber: number,
     paperId: string,
   ): Promise<SaveQuestionPayload[]> {
-    const { completedQuestions } = this.questionParser.parseSegment(items, context.parserState);
+    const { completedQuestions } = this.questionParser.parseSegment(
+      items,
+      context.parserState,
+    );
     const payloads: SaveQuestionPayload[] = [];
 
     for (const question of completedQuestions) {
-      const payload = await this.prepareQuestion(question, context.currentYear, pageNumber, paperId);
+      const payload = await this.prepareQuestion(
+        question,
+        context.currentYear,
+        pageNumber,
+        paperId,
+      );
       if (payload) payloads.push(payload);
     }
 
@@ -330,7 +388,9 @@ export class ExtractionOrchestrator {
     this.logger.log(`Storing ${answers.length} answers for year ${year}`);
 
     const redis = this.redisService.getClient();
-    const entries = Object.fromEntries(answers.map((ans) => [String(ans.questionNumber), ans.correctOption]));
+    const entries = Object.fromEntries(
+      answers.map((ans) => [String(ans.questionNumber), ans.correctOption]),
+    );
     await redis.hset(`answers:${paperId}:${year}`, entries);
   }
 
@@ -339,12 +399,17 @@ export class ExtractionOrchestrator {
     context: ExtractionContext,
     pageNumber: number,
   ): YearAdvanceResult {
-    const { year, isNewYear } = this.yearDetector.detectYear(segmentText, context.currentYear);
+    const { year, isNewYear } = this.yearDetector.detectYear(
+      segmentText,
+      context.currentYear,
+    );
 
     if (!isNewYear) return { year, flushedQuestions: [] };
 
     this.logger.log(`Page ${pageNumber}: new year boundary detected — ${year}`);
-    const flushedQuestions = this.questionParser.finalFlush(context.parserState);
+    const flushedQuestions = this.questionParser.finalFlush(
+      context.parserState,
+    );
     context.isAnswerSection = false;
     return { year, flushedQuestions };
   }
@@ -356,22 +421,36 @@ export class ExtractionOrchestrator {
     paperId: string,
   ): Promise<SaveQuestionPayload | null> {
     if (PAPER_TYPE_QUESTION.test(question.rawText)) {
-      this.logger.debug(`Page ${pageNumber}: ignoring paper type question ${question.questionNumber}`);
+      this.logger.debug(
+        `Page ${pageNumber}: ignoring paper type question ${question.questionNumber}`,
+      );
       return null;
     }
 
-    this.logger.log(`Page ${pageNumber}: processing question ${question.questionNumber} (year: ${year})`);
+    this.logger.log(
+      `Page ${pageNumber}: processing question ${question.questionNumber} (year: ${year})`,
+    );
 
-    const { questionText, optionsText } = this.splitQuestionBody(question.rawText);
+    const { questionText, optionsText } = this.splitQuestionBody(
+      question.rawText,
+    );
     const optionResult = this.optionParser.parseOptions(optionsText);
 
     const validation = await this.validator.validate(
-      { paperId, year, questionNumber: question.questionNumber, questionText, options: optionResult.options },
+      {
+        paperId,
+        year,
+        questionNumber: question.questionNumber,
+        questionText,
+        options: optionResult.options,
+      },
       pageNumber,
     );
 
     if (!validation.valid) {
-      this.logger.warn(`Page ${pageNumber}: question ${question.questionNumber} rejected — ${validation.errors.join(', ')}`);
+      this.logger.warn(
+        `Page ${pageNumber}: question ${question.questionNumber} rejected — ${validation.errors.join(', ')}`,
+      );
       return null;
     }
 
@@ -390,9 +469,14 @@ export class ExtractionOrchestrator {
     };
   }
 
-  private splitQuestionBody(rawText: string): { questionText: string; optionsText: string } {
+  private splitQuestionBody(rawText: string): {
+    questionText: string;
+    optionsText: string;
+  } {
     const lines = rawText.split('\n');
-    const firstOptionIdx = lines.findIndex((line) => /^[A][.)]\s+/i.test(line.trim()));
+    const firstOptionIdx = lines.findIndex((line) =>
+      /^[A][.)]\s+/i.test(line.trim()),
+    );
 
     if (firstOptionIdx !== -1) {
       return {
@@ -403,7 +487,8 @@ export class ExtractionOrchestrator {
 
     const match = /(?:^|\s)([aA][.)]\s+.*?\s[bB][.)]\s+)/s.exec(rawText);
     if (match) {
-      const splitIdx = match.index + (match[0].toLowerCase().startsWith('a') ? 0 : 1);
+      const splitIdx =
+        match.index + (match[0].toLowerCase().startsWith('a') ? 0 : 1);
       return {
         questionText: rawText.slice(0, splitIdx).trim(),
         optionsText: rawText.slice(splitIdx),
@@ -413,7 +498,10 @@ export class ExtractionOrchestrator {
     return { questionText: rawText.trim(), optionsText: '' };
   }
 
-  private enrichWithLatex(questionText: string, options: { label: string; text: string }[]) {
+  private enrichWithLatex(
+    questionText: string,
+    options: { label: string; text: string }[],
+  ) {
     const qLatex = this.latexClassifier.process(questionText);
     let needsLatex = qLatex.latex !== null;
 
@@ -423,7 +511,11 @@ export class ExtractionOrchestrator {
       return { label: opt.label, text: opt.text, latex: result.latex };
     });
 
-    return { questionLatex: qLatex.latex, options: enrichedOptions, needsLatex };
+    return {
+      questionLatex: qLatex.latex,
+      options: enrichedOptions,
+      needsLatex,
+    };
   }
 
   private buildSegmentText(items: TextItem[]): string {

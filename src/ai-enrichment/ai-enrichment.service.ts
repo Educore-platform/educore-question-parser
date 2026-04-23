@@ -19,10 +19,14 @@ export class AiEnrichmentService {
       apiKey: this.configService.getOrThrow<string>('anthropic.apiKey'),
     });
     this.model = this.configService.getOrThrow<string>('anthropic.model');
-    this.maxTokens = this.configService.getOrThrow<number>('anthropic.maxTokens');
+    this.maxTokens = this.configService.getOrThrow<number>(
+      'anthropic.maxTokens',
+    );
   }
 
-  async enrichQuestions(questions: ExamQuestion[]): Promise<EnrichedQuestion[]> {
+  async enrichQuestions(
+    questions: ExamQuestion[],
+  ): Promise<EnrichedQuestion[]> {
     if (!questions.length) return [];
 
     const response = await this.anthropic.messages.create({
@@ -40,7 +44,9 @@ export class AiEnrichmentService {
     const parsed = this.parseResponse(content.text);
 
     if (parsed.length !== questions.length) {
-      this.logger.warn(`Claude returned ${parsed.length} questions, expected ${questions.length}`);
+      this.logger.warn(
+        `Claude returned ${parsed.length} questions, expected ${questions.length}`,
+      );
     }
 
     return parsed;
@@ -61,7 +67,10 @@ export class AiEnrichmentService {
   }
 
   private parseResponse(text: string): EnrichedQuestion[] {
-    const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+    const cleaned = text
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```$/i, '')
+      .trim();
     const parsed = JSON.parse(cleaned);
 
     if (!Array.isArray(parsed.questions)) {

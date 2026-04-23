@@ -11,7 +11,10 @@ const SHORT_LINE_MAX = 35;
 
 @Injectable()
 export class YearDetectorService {
-  detectYear(segmentText: string, currentYear: string | null): YearDetectionResult {
+  detectYear(
+    segmentText: string,
+    currentYear: string | null,
+  ): YearDetectionResult {
     const detectedYear = this.firstAcceptableYear(segmentText);
     if (!detectedYear) return { year: currentYear, isNewYear: false };
 
@@ -31,7 +34,8 @@ export class YearDetectorService {
         OPTION_LINE.test(trimmed) ||
         QUESTION_LINE.test(trimmed) ||
         CONTENT_NOISE.test(trimmed)
-      ) continue;
+      )
+        continue;
 
       if (HEADER_KEYWORDS.test(trimmed)) return yearMatch[1];
 

@@ -1,4 +1,4 @@
-import { ExamQuestion } from "src/model/entities/exam-question.entity";
+import { ExamQuestion } from 'src/model/entities/exam-question.entity';
 
 export interface SaveQuestionPayload {
   paperId: string;
@@ -68,7 +68,6 @@ export interface ParserState {
   lastQuestionNumber: number;
   awaitingContinuation: boolean; // true while inside a question block
 }
-
 
 export interface YearDetectionResult {
   year: string | null;

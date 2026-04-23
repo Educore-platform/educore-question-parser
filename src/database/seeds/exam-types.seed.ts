@@ -14,7 +14,9 @@ async function seedExamTypes() {
   ];
 
   for (const item of examTypes) {
-    const existing = await examTypeRepository.findOne({ where: { code: item.code } });
+    const existing = await examTypeRepository.findOne({
+      where: { code: item.code },
+    });
     if (existing) {
       existing.name = item.name;
       await examTypeRepository.save(existing);

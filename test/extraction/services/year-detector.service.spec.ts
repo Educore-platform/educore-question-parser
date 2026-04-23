@@ -41,27 +41,21 @@ describe('YearDetectorService', () => {
     });
 
     it('sets isNewYear when a different year follows an established year', () => {
-      expect(
-        service.detectYear('Material for 2024 cohort', '2023'),
-      ).toEqual({
+      expect(service.detectYear('Material for 2024 cohort', '2023')).toEqual({
         year: '2024',
         isNewYear: true,
       });
     });
 
     it('does not flag a new year when the same year appears again', () => {
-      expect(
-        service.detectYear('Also 2023', '2023'),
-      ).toEqual({
+      expect(service.detectYear('Also 2023', '2023')).toEqual({
         year: '2023',
         isNewYear: false,
       });
     });
 
     it('uses word boundaries so plain substrings do not match', () => {
-      expect(
-        service.detectYear('code2012x', null).year,
-      ).toBeNull();
+      expect(service.detectYear('code2012x', null).year).toBeNull();
     });
 
     it('does not treat a year as metadata when it is the first token after question numbering', () => {
@@ -84,9 +78,7 @@ describe('YearDetectorService', () => {
     });
 
     it('uses the first acceptable year when an early match is skipped as question-leading', () => {
-      expect(
-        service.detectYear('2. 2023\nEconomics 2024', null),
-      ).toEqual({
+      expect(service.detectYear('2. 2023\nEconomics 2024', null)).toEqual({
         year: '2024',
         isNewYear: false,
       });

@@ -26,9 +26,13 @@ export class AiEnrichmentScheduler {
 
       if (!questions.length) return;
 
-      await this.aiEnrichmentQueueService.enqueueBatches(questions.map((q) => q.id));
+      await this.aiEnrichmentQueueService.enqueueBatches(
+        questions.map((q) => q.id),
+      );
 
-      this.logger.log(`Claimed and enqueued ${questions.length} questions for AI enrichment`);
+      this.logger.log(
+        `Claimed and enqueued ${questions.length} questions for AI enrichment`,
+      );
     } catch (error) {
       this.logger.error(`Enrichment sweeper failed: ${error.message}`);
     } finally {

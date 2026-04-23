@@ -36,7 +36,11 @@ export class InvalidExamQuestionsService {
     qb.skip(skip).take(take).orderBy('iq.createdAt', 'DESC');
 
     const [items, total] = await qb.getManyAndCount();
-    return PaginatedResponseDto.of(items as InvalidQuestionListItemDto[], total, filter);
+    return PaginatedResponseDto.of(
+      items as InvalidQuestionListItemDto[],
+      total,
+      filter,
+    );
   }
 
   async findOne(id: string): Promise<InvalidExamQuestion> {

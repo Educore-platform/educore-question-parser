@@ -13,7 +13,11 @@ import { ExamQuestionRepository } from '../model/repositories/exam-question.repo
 import { AiProcessedExamQuestionRepository } from '../model/repositories/ai-processed-exam-question.repository';
 import { ExamPaperRepository } from '../model/repositories/exam-paper.repository';
 import { AiEnrichmentJobPayload } from '../shared/queues/queue-names';
-import { AiProcessedStatus, ExamPaperStatus, QuestionStatus } from '../model/entities/enums';
+import {
+  AiProcessedStatus,
+  ExamPaperStatus,
+  QuestionStatus,
+} from '../model/entities/enums';
 import { EnrichedQuestion } from '../model/entities/interfaces';
 import { formatErrorForStorage } from '../shared/utils/error-storage.util';
 
@@ -43,16 +47,22 @@ export class AiEnrichmentProcessor extends WorkerHost {
       return;
     }
 
-    const paperIds = [...new Set(questions.map((q) => q.examPaperId).filter(Boolean))] as string[];
+    const paperIds = [
+      ...new Set(questions.map((q) => q.examPaperId).filter(Boolean)),
+    ] as string[];
 
     if (paperIds.length) {
-      await this.examPaperRepo.update({ id: In(paperIds) }, { status: ExamPaperStatus.PROCESSING });
+      await this.examPaperRepo.update(
+        { id: In(paperIds) },
+        { status: ExamPaperStatus.PROCESSING },
+      );
     }
 
     let enrichedResults: EnrichedQuestion[];
 
     try {
-      enrichedResults = await this.aiEnrichmentService.enrichQuestions(questions);
+      enrichedResults =
+        await this.aiEnrichmentService.enrichQuestions(questions);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
 
@@ -60,10 +70,15 @@ export class AiEnrichmentProcessor extends WorkerHost {
         error instanceof AuthenticationError ||
         error instanceof PermissionDeniedError
       ) {
-        this.logger.error(`Non-retryable Anthropic error for job ${job.id}: ${message}`);
+        this.logger.error(
+          `Non-retryable Anthropic error for job ${job.id}: ${message}`,
+        );
         await this.examQuestionRepo.update(
           { id: In(questionIds) },
-          { status: QuestionStatus.FAILED, failureReason: formatErrorForStorage(error) },
+          {
+            status: QuestionStatus.FAILED,
+            failureReason: formatErrorForStorage(error),
+          },
         );
         throw new UnrecoverableError(message);
       }
@@ -90,7 +105,10 @@ export class AiEnrichmentProcessor extends WorkerHost {
       this.logger.error(`AI enrichment failed for job ${job.id}: ${message}`);
       await this.examQuestionRepo.update(
         { id: In(questionIds) },
-        { status: QuestionStatus.FAILED, failureReason: formatErrorForStorage(error) },
+        {
+          status: QuestionStatus.FAILED,
+          failureReason: formatErrorForStorage(error),
+        },
       );
       throw error;
     }
@@ -122,7 +140,9 @@ export class AiEnrichmentProcessor extends WorkerHost {
         ]),
     );
 
-    this.logger.log(`Enriched ${enrichedResults.length}/${questions.length} questions (job ${job.id})`);
+    this.logger.log(
+      `Enriched ${enrichedResults.length}/${questions.length} questions (job ${job.id})`,
+    );
 
     await Promise.all(paperIds.map((id) => this.tryFinalisePaper(id)));
   }
@@ -141,7 +161,10 @@ export class AiEnrichmentProcessor extends WorkerHost {
       where: { examPaperId: paperId, status: QuestionStatus.FAILED },
     });
 
-    const finalStatus = failedCount > 0 ? ExamPaperStatus.PARTIALLY_ENRICHED : ExamPaperStatus.ENRICHED;
+    const finalStatus =
+      failedCount > 0
+        ? ExamPaperStatus.PARTIALLY_ENRICHED
+        : ExamPaperStatus.ENRICHED;
 
     await this.examPaperRepo.update(paperId, { status: finalStatus });
     this.logger.log(`Paper ${paperId} finalised with status ${finalStatus}`);

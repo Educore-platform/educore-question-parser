@@ -84,7 +84,7 @@ export class QuestionParserService {
     let lineY = 0;
 
     for (const item of items) {
-      if (!currentText) lineY = item.transform[5];
+      if (!currentText) lineY = item.transform?.[5] ?? 0;
       currentText += item.hasEOL ? item.str : item.str + ' ';
 
       if (item.hasEOL) {

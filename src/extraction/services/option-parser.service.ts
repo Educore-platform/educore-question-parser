@@ -4,48 +4,83 @@ import {
   OptionParseResult,
 } from '../interfaces/extraction.interfaces';
 
-const OPTION_PATTERN = /([A-E])[.)]\s+(.+?)(?=(?:[A-E][.)]\s+)|$)/gis;
 const VALID_OPTION_SEQUENCE = ['A', 'B', 'C', 'D', 'E'];
+const QUESTION_LINE = /^\s*\d{1,3}[.)]/;
+const OPTION_LINE = /^\s*([A-E])[.)]\s*(.*)$/i;
 
 @Injectable()
 export class OptionParserService {
   parseOptions(text: string): OptionParseResult {
-    const optionMap = new Map<string, string>();
-    const pattern = new RegExp(OPTION_PATTERN.source, OPTION_PATTERN.flags);
+    const lines = text.split(/\r?\n/);
+    const collected: OptionDraft[] = [];
+    let buffer: { label: string; parts: string[] } | null = null;
+    let lastLabelCode: number | null = null;
 
-    let match: RegExpExecArray | null;
-    while ((match = pattern.exec(text)) !== null) {
-      const label = match[1].toUpperCase();
-      if (!optionMap.has(label)) {
-        optionMap.set(label, match[2].trim());
+    const flush = (): void => {
+      if (!buffer) return;
+      collected.push({
+        label: buffer.label,
+        text: buffer.parts.join(' ').trim(),
+      });
+      buffer = null;
+    };
+
+    for (const rawLine of lines) {
+      const trimmed = rawLine.trim();
+      if (!trimmed) continue;
+
+      if (QUESTION_LINE.test(trimmed)) {
+        break;
+      }
+
+      if (this.isLabelPastE(trimmed)) {
+        break;
+      }
+
+      const optMatch = trimmed.match(OPTION_LINE);
+      if (optMatch) {
+        flush();
+        const label = optMatch[1].toUpperCase();
+        const rest = optMatch[2].trimEnd();
+
+        if (lastLabelCode !== null) {
+          const expected = lastLabelCode + 1;
+          if (label.charCodeAt(0) !== expected) {
+            lastLabelCode = label.charCodeAt(0);
+            buffer = { label, parts: rest ? [rest] : [] };
+            continue;
+          }
+        }
+
+        lastLabelCode = label.charCodeAt(0);
+        buffer = { label, parts: rest ? [rest] : [] };
+        continue;
+      }
+
+      if (buffer) {
+        buffer.parts.push(trimmed);
       }
     }
 
-    const sorted = Array.from(optionMap.entries())
-      .sort(([a], [b]) => a.codePointAt(0)! - b.codePointAt(0)!)
-      .map(([label, text]): OptionDraft => ({ label, text }));
+    flush();
 
-    const options = this.extractSequential(sorted);
-    return { valid: this.isValidOptionSet(options), options };
+    const valid = this.isValidOptionSet(collected);
+    return { valid, options: collected };
   }
 
-  private extractSequential(options: OptionDraft[]): OptionDraft[] {
-    if (!options.length || options[0].label !== 'A') return options;
-
-    const sequential: OptionDraft[] = [options[0]];
-    for (let i = 1; i < options.length; i++) {
-      if (options[i].label !== VALID_OPTION_SEQUENCE[i]) break;
-      sequential.push(options[i]);
-    }
-    return sequential;
+  /** Lines like `F) …` end the MCQ block; do not append to option E. */
+  private isLabelPastE(line: string): boolean {
+    const m = line.match(/^\s*([A-Za-z])[.)]\s/);
+    if (!m) return false;
+    const ch = m[1].toUpperCase();
+    return ch > 'E' && ch <= 'Z';
   }
 
   private isValidOptionSet(options: OptionDraft[]): boolean {
-    return (
-      options.length >= 2 &&
-      options.every(
-        (o, i) => o.label === VALID_OPTION_SEQUENCE[i] && o.text.length > 0,
-      )
+    if (options.length < 2) return false;
+    if (!options.every((o) => o.text.length > 0)) return false;
+    return options.every(
+      (o, i) => o.label === VALID_OPTION_SEQUENCE[i],
     );
   }
 }

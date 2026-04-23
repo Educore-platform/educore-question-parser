@@ -27,38 +27,37 @@ async function bootstrap() {
   app.enableCors();
 
   // ── Swagger (non-production only) ────────────────────────────────────────
-    const swaggerConfig = new DocumentBuilder()
-      .setTitle('EduCore Question Parser API')
-      .setDescription(
-        'REST API for parsing, extracting, and enriching exam questions from PDF documents.',
-      )
-      .setVersion('1.0')
-      .addServer(`http://localhost:${process.env.PORT ?? 3000}`, 'Local')
-      .addBearerAuth(
-        { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
-        'access-token',
-      )
-      .addTag('subjects', 'Subject management')
-      .addTag('exam-types', 'Exam type management')
-      .addTag('papers', 'Exam paper management')
-      .addTag('questions', 'Exam question retrieval and management')
-      .addTag(
-        'ai-processed-questions',
-        'AI-enriched question review and correction',
-      )
-      .addTag('documents', 'Document file management')
-      .addTag('invalid-exam-questions', 'Invalid / rejected question records')
-      .build();
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('EduCore Question Parser API')
+    .setDescription(
+      'REST API for parsing, extracting, and enriching exam questions from PDF documents.',
+    )
+    .setVersion('1.0')
+    .addServer(`http://localhost:${process.env.PORT ?? 3000}`, 'Local')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'access-token',
+    )
+    .addTag('subjects', 'Subject management')
+    .addTag('exam-types', 'Exam type management')
+    .addTag('papers', 'Exam paper management')
+    .addTag('questions', 'Exam question retrieval and management')
+    .addTag(
+      'ai-processed-questions',
+      'AI-enriched question review and correction',
+    )
+    .addTag('documents', 'Document file management')
+    .addTag('invalid-exam-questions', 'Invalid / rejected question records')
+    .build();
 
-    const document = SwaggerModule.createDocument(app, swaggerConfig);
-    SwaggerModule.setup('api/docs', app, document, {
-      swaggerOptions: {
-        persistAuthorization: true,
-        tagsSorter: 'alpha',
-        operationsSorter: 'alpha',
-      },
-    });
-
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('api/docs', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+      tagsSorter: 'alpha',
+      operationsSorter: 'alpha',
+    },
+  });
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);

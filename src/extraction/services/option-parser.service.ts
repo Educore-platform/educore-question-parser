@@ -79,8 +79,6 @@ export class OptionParserService {
   private isValidOptionSet(options: OptionDraft[]): boolean {
     if (options.length < 2) return false;
     if (!options.every((o) => o.text.length > 0)) return false;
-    return options.every(
-      (o, i) => o.label === VALID_OPTION_SEQUENCE[i],
-    );
+    return options.every((o, i) => o.label === VALID_OPTION_SEQUENCE[i]);
   }
 }

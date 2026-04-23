@@ -43,7 +43,7 @@ export class YearDetectorService {
         yearGlobal.lastIndex = 0;
         const yearMatches = [...trimmed.matchAll(yearGlobal)];
         const prefixEnd = questionPrefixMatch[0].length;
-        const nonLeading = yearMatches.filter((m) => m.index! >= prefixEnd);
+        const nonLeading = yearMatches.filter((m) => m.index >= prefixEnd);
         if (nonLeading.length === 0) {
           continue;
         }

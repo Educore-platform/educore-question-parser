@@ -52,7 +52,9 @@ describe('OptionParserService', () => {
     });
 
     it('marks invalid when the first label is not A', () => {
-      const result = service.parseOptions(optLines('B) wrong', 'C) also wrong'));
+      const result = service.parseOptions(
+        optLines('B) wrong', 'C) also wrong'),
+      );
 
       expect(result.valid).toBe(false);
       expect(result.options.map((o) => o.label)).toEqual(['B', 'C']);
@@ -74,11 +76,7 @@ describe('OptionParserService', () => {
 
     it('appends wrapped lines to the previous option', () => {
       const result = service.parseOptions(
-        optLines(
-          'A) First line',
-          'continuation of A',
-          'B) Second',
-        ),
+        optLines('A) First line', 'continuation of A', 'B) Second'),
       );
 
       expect(result.valid).toBe(true);
@@ -101,9 +99,7 @@ describe('OptionParserService', () => {
     });
 
     it('skips empty lines', () => {
-      const result = service.parseOptions(
-        optLines('A) A', '', 'B) B', '\t'),
-      );
+      const result = service.parseOptions(optLines('A) A', '', 'B) B', '\t'));
 
       expect(result.valid).toBe(true);
       expect(result.options).toHaveLength(2);
@@ -111,14 +107,7 @@ describe('OptionParserService', () => {
 
     it('does not collect labels outside A–E', () => {
       const result = service.parseOptions(
-        optLines(
-          'A) ok',
-          'B) ok',
-          'C) ok',
-          'D) ok',
-          'E) ok',
-          'F) ignored',
-        ),
+        optLines('A) ok', 'B) ok', 'C) ok', 'D) ok', 'E) ok', 'F) ignored'),
       );
 
       expect(result.options).toHaveLength(5);
@@ -127,11 +116,7 @@ describe('OptionParserService', () => {
 
     it('ignores orphan lines before the first option label', () => {
       const result = service.parseOptions(
-        optLines(
-          'noise before options',
-          'A) First',
-          'B) Second',
-        ),
+        optLines('noise before options', 'A) First', 'B) Second'),
       );
 
       expect(result.options.map((o) => o.label)).toEqual(['A', 'B']);

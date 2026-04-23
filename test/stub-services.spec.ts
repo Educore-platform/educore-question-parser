@@ -24,8 +24,7 @@ function createConfigMock(
 ): Pick<ConfigService, 'get' | 'getOrThrow'> {
   return {
     getOrThrow: jest.fn((key: string) => {
-      if (!(key in defaults))
-        throw new Error(`Unmocked config key: ${key}`);
+      if (!(key in defaults)) throw new Error(`Unmocked config key: ${key}`);
       return defaults[key];
     }),
     get: jest.fn((key: string) =>

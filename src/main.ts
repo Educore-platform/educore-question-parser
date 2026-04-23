@@ -27,7 +27,6 @@ async function bootstrap() {
   app.enableCors();
 
   // ── Swagger (non-production only) ────────────────────────────────────────
-  if (process.env.NODE_ENV !== 'production') {
     const swaggerConfig = new DocumentBuilder()
       .setTitle('EduCore Question Parser API')
       .setDescription(
@@ -59,7 +58,7 @@ async function bootstrap() {
         operationsSorter: 'alpha',
       },
     });
-  }
+
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);

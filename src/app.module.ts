@@ -66,11 +66,13 @@ import { InvalidExamQuestion } from './model/entities/invalid-exam-question.enti
     BullModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
+        const username = config.get<string | undefined>('redis.username');
         const password = config.get<string | undefined>('redis.password');
         return {
           connection: {
-            host: config.get<string>('redis.host', '127.0.0.1'),
-            port: config.get<number>('redis.port', 6379),
+            host: config.get<string>('redis.host'),
+            port: config.get<number>('redis.port'),
+            ...(username ? { username } : {}),
             ...(password ? { password } : {}),
           },
         };

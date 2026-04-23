@@ -9,9 +9,6 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: educore-question-parser  # remove if repo root is the app
 
     steps:
       - name: Checkout repository
@@ -22,7 +19,7 @@ jobs:
         with:
           node-version: '20.x'
           cache: 'npm'
-          cache-dependency-path: educore-question-parser/package-lock.json  # remove if repo root is the app
+          cache-dependency-path: package-lock.json
 
       - name: Install canvas native dependencies
         run: |

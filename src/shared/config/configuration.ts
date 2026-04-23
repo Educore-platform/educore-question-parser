@@ -13,6 +13,11 @@ export default () => ({
     password: process.env.DB_PASSWORD ?? 'postgres',
     database: process.env.DB_NAME ?? 'educore',
   },
+  typeorm: {
+    /** When false, Nest skips migrations on boot (e.g. Docker entrypoint ran them). Default true. */
+    runMigrationsOnStartup:
+      process.env.TYPEORM_RUN_MIGRATIONS_ON_STARTUP !== 'false',
+  },
   upload: {
     maxSizeMB: Number(process.env.MAX_FILE_SIZE_MB ?? 50),
     maxFiles: Number(process.env.MAX_FILES ?? 20),

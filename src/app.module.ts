@@ -55,7 +55,9 @@ import { InvalidExamQuestion } from './model/entities/invalid-exam-question.enti
         synchronize: config.get<string>('nodeEnv') !== 'production',
         // logging: config.get<string>('nodeEnv') === 'development',
         migrations: ['dist/database/migrations/*.js'],
-        migrationsRun: config.get<string>('nodeEnv') === 'production',
+        migrationsRun:
+          config.get<string>('nodeEnv') === 'production' &&
+          config.get<boolean>('typeorm.runMigrationsOnStartup'),
       }),
     }),
 

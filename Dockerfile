@@ -41,12 +41,18 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package*.json ./
 
+COPY --from=builder /app/docker-entrypoint.sh ./
+RUN chmod +x docker-entrypoint.sh
+
+# Migrations + seeds run in docker-entrypoint.sh; Nest skips duplicate migration run.
+ENV TYPEORM_RUN_MIGRATIONS_ON_STARTUP=false
+
 # Non-root user — writable dirs for multer + extraction media (defaults: ./uploads, ./media)
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser \
   && mkdir -p /app/uploads /app/media \
-  && chown -R appuser:appgroup /app/uploads /app/media
+  && chown -R appuser:appgroup /app/uploads /app/media /app/docker-entrypoint.sh
 USER appuser
 
 EXPOSE 3000
 
-CMD ["node", "dist/main.js"]
+ENTRYPOINT ["./docker-entrypoint.sh"]

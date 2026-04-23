@@ -85,4 +85,7 @@ This application is containerized and ready for deployment on Railway.
    - `REDIS_PORT=${{Redis.REDISPORT}}`
    - _Plus your Anthropic and Cloudinary credentials._
 
-> **Note**: Database migrations will automatically run on startup when `NODE_ENV` is set to `production`. To populate initial seed data in production, open the Railway shell for the service and manually execute `npm run seed:all`.
+> **Note (Docker / Railway with this `Dockerfile`)**:
+> - The container **entrypoint** runs pending **migrations**, then **seeds** (exam types and subjects), then starts the API. This only runs the DB setup when `NODE_ENV=production` (as in the table above).
+> - The image sets `TYPEORM_RUN_MIGRATIONS_ON_STARTUP=false` so Nest does not run migrations a second time; the entrypoint already did.
+> - To run the same steps locally after `npm run build`, use `npm run migration:run:dist` and `npm run seed:all:prod` (with `DB_*` env set). To restore the old “migrations on Nest boot” behavior in production, set `TYPEORM_RUN_MIGRATIONS_ON_STARTUP=true` in the service env and run the app without the Docker entrypoint (not recommended for this image).

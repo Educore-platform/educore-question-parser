@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import * as dotenv from 'dotenv';
+import * as path from 'node:path';
 import { DataSource } from 'typeorm';
 
 // Load env before anything else (mirrors what the app does via @nestjs/config)
@@ -12,6 +13,13 @@ import { ExamQuestion } from '../model/entities/exam-question.entity';
 import { ExamType } from '../model/entities/exam-type.entity';
 import { Subject } from '../model/entities/subject.entity';
 import { InvalidExamQuestion } from '../model/entities/invalid-exam-question.entity';
+
+/** Resolves .ts migrations for ts-node CLI; .js when this file runs from dist/ */
+const migrationsGlob = path.join(
+  __dirname,
+  'migrations',
+  /[/\\]dist[/\\]/.test(__dirname) ? '*.js' : '*.ts',
+);
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -31,8 +39,7 @@ export const AppDataSource = new DataSource({
     InvalidExamQuestion,
   ],
 
-  // Migrations live here — generated files land in src/database/migrations/
-  migrations: ['src/database/migrations/*.ts'],
+  migrations: [migrationsGlob],
 
   // NEVER synchronize in production; rely on migrations instead
   synchronize: false,

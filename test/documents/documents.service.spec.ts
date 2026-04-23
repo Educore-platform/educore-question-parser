@@ -58,6 +58,7 @@ describe('DocumentsService', () => {
           examPaperId: paperId,
           type: DocumentType.PDF,
           source: DocumentSource.UPLOADED,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Not(IsNull()) + Jest matcher
           contentSha256: expect.anything(),
         },
         select: ['contentSha256'],

@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
+import { MediaHandlerService } from '../../../src/extraction/services/media-handler.service';
 import { QuestionPersistenceService } from '../../../src/extraction/services/question-persistence.service';
 import { ExamQuestion } from '../../../src/model/entities/exam-question.entity';
 import {
@@ -15,15 +17,22 @@ describe('QuestionPersistenceService', () => {
   beforeEach(async () => {
     repo = {
       create: jest.fn((entity) => entity as ExamQuestion),
-      save: jest.fn(async (entity: ExamQuestion) => ({
-        ...entity,
-        id: 'ffffffff-ffff-ffff-ffff-ffffffffffff',
-      })),
+      save: jest.fn((input: ExamQuestion | ExamQuestion[]) => {
+        const list = Array.isArray(input) ? input : [input];
+        return Promise.resolve(
+          list.map((entity) => ({
+            ...entity,
+            id: 'ffffffff-ffff-ffff-ffff-ffffffffffff',
+          })),
+        );
+      }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         QuestionPersistenceService,
+        { provide: DataSource, useValue: {} },
+        { provide: MediaHandlerService, useValue: {} },
         { provide: getRepositoryToken(ExamQuestion), useValue: repo },
       ],
     }).compile();
@@ -31,7 +40,7 @@ describe('QuestionPersistenceService', () => {
     service = module.get(QuestionPersistenceService);
   });
 
-  describe('save', () => {
+  describe('saveMany', () => {
     const basePayload = {
       paperId: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
       year: '2024',
@@ -46,7 +55,7 @@ describe('QuestionPersistenceService', () => {
     };
 
     it('persists RAW status when needsLatex is false', async () => {
-      await service.save({ ...basePayload, needsLatex: false });
+      await service.saveMany([{ ...basePayload, needsLatex: false }]);
 
       expect(repo.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -64,11 +73,13 @@ describe('QuestionPersistenceService', () => {
     });
 
     it('persists LATEX_QUEUED when needsLatex is true', async () => {
-      await service.save({
-        ...basePayload,
-        needsLatex: true,
-        questionLatex: '$x$',
-      });
+      await service.saveMany([
+        {
+          ...basePayload,
+          needsLatex: true,
+          questionLatex: '$x$',
+        },
+      ]);
 
       expect(repo.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -81,11 +92,13 @@ describe('QuestionPersistenceService', () => {
       const options = [
         { label: 'A', text: 'a', latex: '$1$' as string | null },
       ];
-      await service.save({
-        ...basePayload,
-        options,
-        needsLatex: true,
-      });
+      await service.saveMany([
+        {
+          ...basePayload,
+          options,
+          needsLatex: true,
+        },
+      ]);
 
       expect(repo.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -95,11 +108,13 @@ describe('QuestionPersistenceService', () => {
     });
 
     it('handles edge case year string "Unknown"', async () => {
-      await service.save({
-        ...basePayload,
-        year: 'Unknown',
-        needsLatex: false,
-      });
+      await service.saveMany([
+        {
+          ...basePayload,
+          year: 'Unknown',
+          needsLatex: false,
+        },
+      ]);
 
       expect(repo.create).toHaveBeenCalledWith(
         expect.objectContaining({ year: 'Unknown' }),

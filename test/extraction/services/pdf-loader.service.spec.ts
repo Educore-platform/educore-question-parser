@@ -42,7 +42,7 @@ describe('PdfLoaderService', () => {
       mockGetDocument.mockReturnValue({
         promise: Promise.resolve({
           numPages: 2,
-          getPage: jest.fn((pageNum: number) =>
+          getPage: jest.fn(() =>
             Promise.resolve({
               getTextContent: () =>
                 Promise.resolve({

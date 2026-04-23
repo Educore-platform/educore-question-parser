@@ -6,6 +6,8 @@ import {
 } from '@nestjs/common';
 import { createWorker, Worker } from 'tesseract.js';
 
+import { toErrorMessage } from '../shared/utils/error-message.util';
+
 const OCR_TIMEOUT_MS = 30_000;
 
 @Injectable()
@@ -36,8 +38,10 @@ export class OcrService implements OnModuleInit, OnModuleDestroy {
         data: { text },
       } = await Promise.race([this.worker.recognize(imagePath), timeout]);
       return text.trim() || null;
-    } catch (error) {
-      this.logger.error(`OCR failed for ${imagePath}: ${error.message}`);
+    } catch (error: unknown) {
+      this.logger.error(
+        `OCR failed for ${imagePath}: ${toErrorMessage(error)}`,
+      );
       return null;
     }
   }

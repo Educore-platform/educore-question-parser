@@ -1,5 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import type { PDFPageProxy } from 'pdfjs-dist';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { createCanvas, ImageData } from 'canvas';
@@ -7,7 +8,6 @@ import {
   TextItem,
   ExtractedImage,
   ExtractedTable,
-  PdfJsImage,
   TableRow,
 } from '../interfaces/extraction.interfaces';
 
@@ -17,12 +17,21 @@ const PDF_OPS = {
   PAINT_INLINE_IMAGE_XOBJECT: 26,
 } as const;
 
-const IDENTITY_TRANSFORM = [1, 0, 0, 1, 0, 0] as const;
+const IDENTITY_TRANSFORM: number[] = [1, 0, 0, 1, 0, 0];
 const TABLE_MIN_COLS = 3;
 const TABLE_MIN_ROWS = 3;
 const TABLE_ROW_GAP = 30;
 const ROW_Y_TOLERANCE = 5;
 const SCANNED_MIN_DIMENSION = 100;
+
+type PdfOperatorList = Awaited<ReturnType<PDFPageProxy['getOperatorList']>>;
+
+/** PDF.js image object: `data` may be an ArrayBuffer or a typed array. */
+type PdfJsImageBytes = {
+  width: number;
+  height: number;
+  data: ArrayBuffer | ArrayBufferView;
+};
 
 @Injectable()
 export class MediaHandlerService implements OnModuleInit {
@@ -37,17 +46,21 @@ export class MediaHandlerService implements OnModuleInit {
     await fs.mkdir(this.mediaDir, { recursive: true });
   }
 
-  async extractImages(page: any, pageNum: number): Promise<ExtractedImage[]> {
-    const opList = await page.getOperatorList();
+  async extractImages(
+    page: PDFPageProxy,
+    pageNum: number,
+  ): Promise<ExtractedImage[]> {
+    const opList: PdfOperatorList = await page.getOperatorList();
     const images: ExtractedImage[] = [];
     let currentTransform = [...IDENTITY_TRANSFORM];
 
     for (let i = 0; i < opList.fnArray.length; i++) {
       const fn = opList.fnArray[i];
-      const args = opList.argsArray[i];
+      const argsRaw: unknown[] = opList.argsArray[i] as unknown[];
 
       if (fn === PDF_OPS.TRANSFORM) {
-        currentTransform = args;
+        const nums = argsRaw.filter((x): x is number => typeof x === 'number');
+        if (nums.length >= 6) currentTransform = nums.slice(0, 6);
         continue;
       }
 
@@ -57,14 +70,15 @@ export class MediaHandlerService implements OnModuleInit {
       )
         continue;
 
-      const imgName = args[0];
+      const imgName = argsRaw[0];
       try {
-        const img: PdfJsImage = await page.objs.get(imgName);
-        if (!img) continue;
+        const raw: unknown = await page.objs.get(String(imgName));
+        if (!this.isPdfJsImage(raw)) continue;
 
+        const img = raw;
         const fileName = `page_${pageNum}_img_${i}.png`;
         const filePath = path.join(this.mediaDir, fileName);
-        await fs.writeFile(filePath, await this.renderImageToBuffer(img));
+        await fs.writeFile(filePath, this.renderImageToBuffer(img));
 
         images.push({
           type: 'image',
@@ -74,9 +88,9 @@ export class MediaHandlerService implements OnModuleInit {
           height: img.height,
           isScanned: false,
         });
-      } catch (err) {
+      } catch (err: unknown) {
         this.logger.error(
-          `Failed to extract image ${imgName} on page ${pageNum}`,
+          `Failed to extract image ${String(imgName)} on page ${pageNum}`,
           err,
         );
       }
@@ -85,14 +99,27 @@ export class MediaHandlerService implements OnModuleInit {
     return images;
   }
 
-  private async renderImageToBuffer(img: PdfJsImage): Promise<Buffer> {
+  private isPdfJsImage(value: unknown): value is PdfJsImageBytes {
+    if (!value || typeof value !== 'object') return false;
+    const o = value as Record<string, unknown>;
+    if (typeof o.width !== 'number' || typeof o.height !== 'number')
+      return false;
+    const data = o.data;
+    return data instanceof ArrayBuffer || ArrayBuffer.isView(data);
+  }
+
+  private renderImageToBuffer(img: PdfJsImageBytes): Buffer {
     const canvas = createCanvas(img.width, img.height);
     const ctx = canvas.getContext('2d');
-    ctx.putImageData(
-      new ImageData(new Uint8ClampedArray(img.data), img.width, img.height),
-      0,
-      0,
-    );
+    const pixels =
+      img.data instanceof ArrayBuffer
+        ? new Uint8ClampedArray(img.data)
+        : new Uint8ClampedArray(
+            img.data.buffer,
+            img.data.byteOffset,
+            img.data.byteLength,
+          );
+    ctx.putImageData(new ImageData(pixels, img.width, img.height), 0, 0);
     return canvas.toBuffer('image/png');
   }
 

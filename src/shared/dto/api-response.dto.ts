@@ -1,7 +1,7 @@
 export interface ApiResponse<T = unknown> {
   success: boolean;
   message: string;
-  error: unknown | null;
+  error: unknown;
   data: T | null;
   timeStamp: string;
 }

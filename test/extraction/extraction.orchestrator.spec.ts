@@ -97,7 +97,7 @@ describe('ExtractionOrchestrator', () => {
 
     documentRepo = {
       update: jest.fn().mockResolvedValue({ affected: 1 }),
-      findOne: jest.fn().mockImplementation(async () => ({
+      findOne: jest.fn().mockImplementation(() => ({
         id: pdfDocId,
         storagePath: pdfStoragePathForMocks,
       })),
@@ -383,6 +383,7 @@ describe('ExtractionOrchestrator', () => {
         paperId,
         expect.objectContaining({
           status: ExamPaperStatus.FAILED,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Jest asymmetric matcher
           failureReason: expect.any(String),
         }),
       );
@@ -406,6 +407,7 @@ describe('ExtractionOrchestrator', () => {
       expect(questionPersistence.savePaperResult).toHaveBeenCalledWith(
         expect.objectContaining({
           paperId,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- nested Jest matchers
           questions: expect.arrayContaining([
             expect.objectContaining({ year: 'Unknown' }),
           ]),

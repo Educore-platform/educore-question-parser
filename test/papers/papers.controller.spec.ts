@@ -91,10 +91,12 @@ describe('PapersController', () => {
         subjectId: 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee',
       };
 
-      papersService.createPaper.mockImplementation(async (file, dto) => ({
-        paperId: `${file.path}:${dto.examTypeId}`,
-        status: ExamPaperStatus.PENDING,
-      }));
+      papersService.createPaper.mockImplementation((file, dto) =>
+        Promise.resolve({
+          paperId: `${file.path}:${dto.examTypeId}`,
+          status: ExamPaperStatus.PENDING,
+        }),
+      );
 
       const f1 = mockFile('/tmp/one.pdf');
       const f2 = mockFile('/tmp/two.pdf');

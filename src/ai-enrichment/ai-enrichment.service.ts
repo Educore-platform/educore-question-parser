@@ -71,12 +71,19 @@ export class AiEnrichmentService {
       .replace(/^```(?:json)?\s*/i, '')
       .replace(/\s*```$/i, '')
       .trim();
-    const parsed = JSON.parse(cleaned);
-
-    if (!Array.isArray(parsed.questions)) {
+    const parsedUnknown: unknown = JSON.parse(cleaned);
+    if (
+      typeof parsedUnknown !== 'object' ||
+      parsedUnknown === null ||
+      !('questions' in parsedUnknown)
+    ) {
+      throw new TypeError('Claude response missing "questions" array');
+    }
+    const { questions } = parsedUnknown as { questions: unknown };
+    if (!Array.isArray(questions)) {
       throw new TypeError('Claude response missing "questions" array');
     }
 
-    return parsed.questions as EnrichedQuestion[];
+    return questions as EnrichedQuestion[];
   }
 }

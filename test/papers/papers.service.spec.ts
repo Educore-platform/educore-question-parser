@@ -19,6 +19,7 @@ import { ExamQuestion } from '../../src/model/entities/exam-question.entity';
 import { ExamType } from '../../src/model/entities/exam-type.entity';
 import { Subject } from '../../src/model/entities/subject.entity';
 import { DocumentsService } from '../../src/documents/documents.service';
+import { Document } from '../../src/model/entities/document.entity';
 import { ExamPaperStatus } from '../../src/model/entities/enums';
 import { QUEUE_NAMES } from '../../src/shared/queues/queue-names';
 import { GetPaperQuestionsQueryDto } from '../../src/papers/dto/pagination-query.dto';
@@ -69,21 +70,21 @@ describe('PapersService', () => {
     };
 
     dataSource = {
-      transaction: jest.fn(async (fn) => {
+      transaction: jest.fn((fn) => {
         const em = {
-          save: jest.fn(
-            async (_entity: unknown, row: Record<string, unknown>) => {
-              if ('examTypeId' in row) {
-                return {
-                  ...row,
-                  id: paperId,
-                  status: ExamPaperStatus.PENDING,
-                } as ExamPaper;
-              }
-              return {} as Document;
-            },
-          ),
+          save: jest.fn((_entity: unknown, row: Record<string, unknown>) => {
+            if ('examTypeId' in row) {
+              return Promise.resolve({
+                ...row,
+                id: paperId,
+                status: ExamPaperStatus.PENDING,
+              } as ExamPaper);
+            }
+            return Promise.resolve({} as Document);
+          }),
         };
+        // Callback is typed loosely by jest.fn; runtime matches DataSource.transaction.
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return -- transaction mock
         return fn(em);
       }),
     };
@@ -317,15 +318,16 @@ describe('PapersService', () => {
 
   describe('getPaperQuestions', () => {
     function mockQueryBuilder(items: ExamQuestion[], total: number) {
+      const andWhere = jest.fn().mockReturnThis();
       const qb = {
         where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
+        andWhere,
         skip: jest.fn().mockReturnThis(),
         take: jest.fn().mockReturnThis(),
         getManyAndCount: jest.fn().mockResolvedValue([items, total]),
       } as unknown as SelectQueryBuilder<ExamQuestion>;
       questionRepo.createQueryBuilder.mockReturnValue(qb);
-      return qb;
+      return { qb, andWhere };
     }
 
     it('returns paginated questions without year filter', async () => {
@@ -341,13 +343,13 @@ describe('PapersService', () => {
 
     it('adds year filter when year provided', async () => {
       const rows: ExamQuestion[] = [];
-      const qb = mockQueryBuilder(rows, 0);
+      const { andWhere } = mockQueryBuilder(rows, 0);
 
       const query = { ...defaultQuery, year: '2024' };
 
       await service.getPaperQuestions(paperId, query);
 
-      expect(qb.andWhere).toHaveBeenCalledWith('question.year = :year', {
+      expect(andWhere).toHaveBeenCalledWith('question.year = :year', {
         year: '2024',
       });
     });

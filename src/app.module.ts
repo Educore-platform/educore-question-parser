@@ -65,12 +65,16 @@ import { InvalidExamQuestion } from './model/entities/invalid-exam-question.enti
     // ── BullMQ ─────────────────────────────────────────────────────────────
     BullModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        connection: {
-          host: config.get<string>('redis.host', '127.0.0.1'),
-          port: config.get<number>('redis.port', 6379),
-        },
-      }),
+      useFactory: (config: ConfigService) => {
+        const password = config.get<string | undefined>('redis.password');
+        return {
+          connection: {
+            host: config.get<string>('redis.host', '127.0.0.1'),
+            port: config.get<number>('redis.port', 6379),
+            ...(password ? { password } : {}),
+          },
+        };
+      },
     }),
 
     // ── Feature modules ────────────────────────────────────────────────────

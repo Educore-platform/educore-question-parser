@@ -32,6 +32,7 @@ describe('RedisService', () => {
       get: jest.fn((key: string, defaultValue?: unknown) => {
         if (key === 'redis.host') return '127.0.0.1';
         if (key === 'redis.port') return 6379;
+        if (key === 'redis.password') return undefined;
         return defaultValue;
       }),
     };
@@ -75,6 +76,24 @@ describe('RedisService', () => {
         host: '127.0.0.1',
         port: 6379,
         lazyConnect: true,
+      });
+    });
+
+    it('passes password when redis.password is set', async () => {
+      configService.get.mockImplementation((key: string, defaultValue?: unknown) => {
+        if (key === 'redis.host') return 'redis.example';
+        if (key === 'redis.port') return 6380;
+        if (key === 'redis.password') return 'secret';
+        return defaultValue;
+      });
+
+      await service.onModuleInit();
+
+      expect(Redis).toHaveBeenCalledWith({
+        host: 'redis.example',
+        port: 6380,
+        lazyConnect: true,
+        password: 'secret',
       });
     });
 
